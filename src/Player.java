@@ -3,23 +3,68 @@ package src;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Polygon;
+import java.awt.event.KeyEvent;
+import java.util.ArrayList;
+import java.util.List;
 
 import physics.*;
 
 public class Player extends PhysicsBall {
 
     public Color color;
-    public int baseSpeed = 10;
-    public int baseJumpHeight = 50;
+    public int baseSpeed = 55;
+    public int baseMaxSpeed = 250;
+    public int baseJumpHeight = 550;
+
     public Vector2 direction = new Vector2(1, 0);
     public float size = 30;
 
-    Player(Vector2 pos, Color color, PhysicsHandler handler) {
-        super(25, 0.0, 10.0, 0L);
+    public Keys keys = new Keys();
+
+    public boolean airBorne = false;
+    public float airBorneTimer = 0;
+
+    public Player(Vector2 pos, Color color, PhysicsHandler handler) {
+        super(25, 0.0, 5.0, 0L);
         this.pos = pos;
         this.color = color;
+        this.setListener(new LandingListener());
 
         handler.addBall(this);
+
+    }
+
+    public class Keys {
+        public List<Key> list = new ArrayList<>();
+        Key space = new Key(KeyEvent.VK_SPACE);
+        Key w = new Key(KeyEvent.VK_W);
+        Key a = new Key(KeyEvent.VK_A);
+        Key s = new Key(KeyEvent.VK_S);
+        Key d = new Key(KeyEvent.VK_D);
+        Key q = new Key(KeyEvent.VK_Q);
+        Key e = new Key(KeyEvent.VK_E);
+        Key x = new Key(KeyEvent.VK_X);
+
+        public Keys() {
+            this.list.add(space);
+            this.list.add(w);
+            this.list.add(a);
+            this.list.add(s);
+            this.list.add(d);
+            this.list.add(q);
+            this.list.add(e);
+            this.list.add(x);
+        }
+
+    }
+
+    public class Key {
+        int code;
+        boolean pressed = false;
+
+        public Key(int code) {
+            this.code = code;
+        }
     }
 
     @Override
@@ -38,6 +83,87 @@ public class Player extends PhysicsBall {
         g.setColor(color);
         g.fillPolygon(shape);
         g.setColor(old);
+    }
+
+    public void keyPress(int keyCode) {
+        for (Key k : keys.list) {
+            if (k.code == keyCode) {
+                k.pressed = true;
+            }
+        }
+    }
+
+    public void keyRelease(int keyCode) {
+        for (Key k : keys.list) {
+            if (k.code == keyCode) {
+                k.pressed = false;
+            }
+        }
+    }
+
+    public void handleInputs() {
+        if (keys.space.pressed && !airBorne) { // must be on the ground or in coyote timer
+            // jump
+            vel.set(new Vector2(0, -baseJumpHeight));
+            airBorne = true;
+        }
+
+        // walk left
+        if (keys.a.pressed) {
+            if (vel.x > -baseMaxSpeed) {
+                vel.x -= baseSpeed;
+            }
+        }
+        // walk right
+        if (keys.d.pressed) {
+            if (vel.x < baseMaxSpeed) {
+                vel.x += baseSpeed;
+            }
+        }
+    }
+
+    public void updateTimers(double dt) {
+        if (airBorne) {
+            airBorneTimer += dt;
+        }
+        // falling and coyote time
+        if (vel.y > 0.0) {
+            airBorneTimer += dt;
+            if (airBorneTimer > 0.3) {
+                airBorne = true;
+            }
+        }
+    }
+
+    @Override
+    public void update(double gravity, double dt) {
+        vel.y += gravity * dt;
+        pos.addLocal(vel.scale(dt));
+        // friction
+        if (airBorne) {
+            vel.x *= 0.9;
+        } else {
+            vel.x *= 0.85;
+        }
+        updateTimers(dt);
+    }
+
+    public class LandingListener extends CollisionListener {
+        public LandingListener() {
+            super();
+        }
+
+        // get collision below the player hitbox
+        @Override
+        public void action(PhysicsObject o, Manifold m) {
+            // collision with rect, which top is below the triangle
+            for (Vector2 c : m.contacts) {
+                if (c.y > pos.y) {
+                    airBorne = false; // reset airborne
+                    airBorneTimer = 0; // reset airborne timer
+                }
+            }
+        }
     }
 
 }

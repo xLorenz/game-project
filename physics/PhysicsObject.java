@@ -4,7 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.util.Random;
 
-abstract class PhysicsObject {
+public abstract class PhysicsObject {
 
     public Vector2 pos = new Vector2(); // pos, for all objects, its center
     public int cx, cy; // center chunkPos
@@ -27,9 +27,9 @@ abstract class PhysicsObject {
         displayColor = new Color(r.nextInt(255), r.nextInt(255), r.nextInt(255));
     }
 
-    public void notifyListener(PhysicsObject o) {
+    public void notifyListener(PhysicsObject o, Manifold m) {
         if (collisionListener != null) {
-            collisionListener.action(o);
+            collisionListener.action(o, m);
         }
     }
 

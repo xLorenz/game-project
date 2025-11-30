@@ -18,7 +18,7 @@ public class PhysicsBall extends PhysicsObject {
 
         pos.addLocal(vel.scale(dt));
         // friction
-        vel.x *= 0.9;
+        vel.x *= 0.99;
     }
 
     @Override

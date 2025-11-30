@@ -111,10 +111,6 @@ public class PhysicsHandler {
     public void updatePhysics(double dt) {
 
         for (PhysicsObject o : objects) {
-            o.update(gravity, dt);
-        }
-
-        for (PhysicsObject o : objects) {
             updateObjectsChunk(o);
         }
 
@@ -138,6 +134,10 @@ public class PhysicsHandler {
                 }
             }
         }
+
+        for (PhysicsObject o : objects) {
+            o.update(gravity, dt);
+        }
     }
 
     public void handleCollision(PhysicsObject o1, PhysicsObject o2) {
@@ -145,6 +145,9 @@ public class PhysicsHandler {
 
         if (!m.collided)
             return;
+
+        o1.notifyListener(o2, m);
+        o2.notifyListener(o1, m);
 
         // Ensure manifold.normal points from o1 -> o2 (handleCollision expects this)
         if (m.normal == null || m.normal.lengthSquared() < 1e-9) {
@@ -184,7 +187,6 @@ public class PhysicsHandler {
         // if vels are separating already, don't apply impulse
         if (velAlongNormal <= 0.0) {
             double e = Math.max(o1.elasticity, o2.elasticity);
-            System.out.println("e=" + e + " e1=" + o1.elasticity + " e2=" + o2.elasticity);
 
             // compute impulse scalar
             double j = -(1.0 + e) * velAlongNormal;
@@ -219,7 +221,7 @@ public class PhysicsHandler {
     }
 
     public void addBall(int x, int y, int radius, double elasticity) {
-        PhysicsBall ball = new PhysicsBall(radius, elasticity, 0.001, nextId++);
+        PhysicsBall ball = new PhysicsBall(radius, elasticity, 5, nextId++);
         ball.pos.x = x;
         ball.pos.y = y;
         objects.add(ball);
