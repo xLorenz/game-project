@@ -113,4 +113,9 @@ public class Vector2 {
 
     }
 
+    public void round() {
+        x = (int) x;
+        y = (int) y;
+    }
+
 }

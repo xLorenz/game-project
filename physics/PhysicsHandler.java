@@ -17,7 +17,10 @@ public class PhysicsHandler {
     public Vector2 mapAnchor = new Vector2(); // map anchor controls the position from where the world is rendered, it
                                               // doesnt affect chunk calculations
     public Vector2 mapAnchorVelocity = new Vector2();
+    public Vector2 mapAnchorVelocityScaled = new Vector2();
     public PhysicsObject mainObject = null; // the main object is what the camera "follows"
+    public double anchorFollowVelocity = 20;
+    public double anchorFollowFriction = 0.97;
 
     public Map<Long, Chunk> chunks = new HashMap<>();
     public List<PhysicsObject> objects = new ArrayList<>();
@@ -72,8 +75,8 @@ public class PhysicsHandler {
     }
 
     public void updateObjectsChunk(PhysicsObject o) {
-        int ncx = (int) (Math.floor(o.pos.x / chunkDimension));
-        int ncy = (int) (Math.floor(o.pos.y / chunkDimension));
+        int ncx = (int) (Math.floor(o.pos.x - (int) mapAnchor.x / chunkDimension));
+        int ncy = (int) (Math.floor(o.pos.y - (int) mapAnchor.y / chunkDimension));
 
         if (ncx == o.cx && ncy == o.cy)
             return;
@@ -81,7 +84,7 @@ public class PhysicsHandler {
         // if the chunk changed, and the object is large, it will occupy different
         // chunks
 
-        int[] occuppiedChunks = o.getOccuppiedChunks(chunkDimension);
+        int[] occuppiedChunks = o.getOccuppiedChunks(chunkDimension, mapAnchor);
         int minCx = occuppiedChunks[0];
         int maxCx = occuppiedChunks[1];
         int minCy = occuppiedChunks[2];
@@ -113,33 +116,17 @@ public class PhysicsHandler {
     }
 
     public void updatePhysics(double dt) {
-        // move camera
-        if (mainObject != null) {
-            if (mainObject.pos.x < boundaries.left) {
-                mapAnchorVelocity.x -= 0.5;
-            }
-            if (mainObject.pos.x > boundaries.right) {
-                mapAnchorVelocity.x += 0.5;
-            }
-            if (mainObject.pos.y < boundaries.top) {
-                mapAnchorVelocity.y -= 0.5;
-            }
-            if (mainObject.pos.y > boundaries.bottom) {
-                mapAnchorVelocity.y += 0.5;
-            }
 
-            if (mapAnchorVelocity.lengthSquared() > 0.0001) {
-                mapAnchor.addLocal(mapAnchorVelocity.scale(dt));
-                mapAnchorVelocity.scaleLocal(0.9);
-            }
-        }
-
+        // update chunks
         for (PhysicsObject o : objects) {
             updateObjectsChunk(o);
         }
 
+        // check by pairs
         java.util.HashSet<Long> processedPairs = new java.util.HashSet<>();
         recentCollisions.clear();
+
+        // iterate objects
         for (PhysicsObject o1 : objects) {
             for (int cx = o1.cMinCx; cx <= o1.cMaxCx; cx++) {
                 for (int cy = o1.cMinCy; cy <= o1.cMaxCy; cy++) {
@@ -159,9 +146,39 @@ public class PhysicsHandler {
             }
         }
 
+        // update objects positions
         for (PhysicsObject o : objects) {
             o.update(gravity, dt);
-            o.pos.subLocal(mapAnchorVelocity);
+            o.pos.addLocal(mapAnchorVelocityScaled); // camera
+        }
+
+        // move camera
+        mapAnchor.addLocal(mapAnchorVelocityScaled); // move anchor
+        if (mainObject != null) {
+
+            // update anchor velocity
+            if (mainObject.pos.x < boundaries.left) {
+                mapAnchorVelocity.x += anchorFollowVelocity;
+            }
+            if (mainObject.pos.x > boundaries.right) {
+                mapAnchorVelocity.x -= anchorFollowVelocity;
+            }
+            if (mainObject.pos.y < boundaries.top) {
+                mapAnchorVelocity.y += anchorFollowVelocity;
+            }
+            if (mainObject.pos.y > boundaries.bottom) {
+                mapAnchorVelocity.y -= anchorFollowVelocity;
+            }
+
+            // friction and scaling
+            if (mapAnchorVelocity.lengthSquared() > 0.00000001) {
+                mapAnchorVelocityScaled = mapAnchorVelocity.scale(dt);
+                mapAnchorVelocityScaled.round();
+                mapAnchorVelocity.scaleLocal(anchorFollowFriction);
+            } else {
+                mapAnchorVelocityScaled.set(0, 0);
+                mapAnchorVelocity.set(0, 0);
+            }
         }
     }
 
@@ -275,9 +292,12 @@ public class PhysicsHandler {
         // remove from chunks
         for (int cx = o.cMinCx; cx <= o.cMaxCx; cx++) {
             for (int cy = o.cMinCy; cy <= o.cMaxCy; cy++) {
-                Chunk old = chunks.get(keyFor(cx, cy));
-                if (old != null)
-                    old.objects.remove(o);
+                Chunk ch = chunks.get(keyFor(cx, cy));
+                if (ch == null)
+                    continue;
+                if (ch.objects.contains(o)) {
+                    ch.objects.remove(o);
+                }
             }
         }
     }
@@ -308,14 +328,42 @@ public class PhysicsHandler {
     }
 
     public void displayChunkBorders(Graphics g, int scrWidth, int scrHeight) {
+        // draw anchor
+        g.setColor(Color.blue);
+        g.drawOval((int) mapAnchor.x - 5, (int) mapAnchor.y - 5, 10, 10);
         // draw grid
         g.setColor(Color.gray);
         for (int i = 0; i < scrWidth / chunkDimension; i++) {
-            g.drawLine(i * chunkDimension, 0, i * chunkDimension, scrHeight); // vertical
+            g.drawLine((i * chunkDimension) + (int) mapAnchor.x, 0, (i * chunkDimension) + (int) mapAnchor.x,
+                    scrHeight); // vertical
         }
         for (int i = 0; i < scrHeight / chunkDimension; i++) {
-            g.drawLine(0, i * chunkDimension, scrWidth, i * chunkDimension); // horizontal
+            g.drawLine(0, (i * chunkDimension) + (int) mapAnchor.y, scrWidth, (i * chunkDimension) + (int) mapAnchor.y); // horizontal
         }
-        // g.fillRect(scrWidth / 2 - 5, scrHeight / 2 - 5, 10, 10); // point middle
+
+        // draw recorded chunks
+        // drawRecordedChunks(g);
+    }
+
+    public void drawRecordedChunks(Graphics g) {
+        g.setColor(Color.yellow);
+        for (Map.Entry<Long, Chunk> entry : chunks.entrySet()) {
+            long key = entry.getKey();
+            Chunk chunk = entry.getValue();
+
+            int cx = (int) (key >> 32);
+            int cy = (int) key;
+
+            // convert chunk coordinates to world coordinates
+            int worldY = cy * chunkDimension + (int) mapAnchor.y;
+            int worldX = cx * chunkDimension + (int) mapAnchor.x;
+
+            g.drawRect(worldX, worldY, chunkDimension, chunkDimension);
+            if (!chunk.objects.isEmpty()) {
+                g.setColor(Color.green);
+                g.fillRect(worldX, worldY, chunkDimension, chunkDimension);
+                g.setColor(Color.yellow);
+            }
+        }
     }
 }

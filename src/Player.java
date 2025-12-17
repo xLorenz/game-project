@@ -12,9 +12,13 @@ import physics.*;
 public class Player extends PhysicsBall {
 
     public Color color;
+    public int health;
+    public int baseHealth = 100;
+
     public int baseSpeed = 55;
     public double baseSprintModifier = 2;
     public int baseMaxSpeed = 250;
+
     public int baseJumpHeight = 550;
 
     public Vector2 direction = new Vector2(1, 0);
@@ -33,6 +37,7 @@ public class Player extends PhysicsBall {
         this.pos = pos;
         this.color = color;
         this.setListener(new LandingListener());
+        this.health = baseHealth;
 
         handler.addBall(this);
 
