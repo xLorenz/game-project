@@ -1,4 +1,4 @@
-- Keyboard Inputs
+### Keyboard Inputs
 Keyboard input and mouse input are handled in the [Panel] class.
 
 They get to the [Player] class through [keyPress(int)] and [keyRelease(int)], and then handled in the [handleInputs()] function wich gets called in the [actionPerformed(ActionEvent)] in the [Panel] class.
@@ -13,7 +13,7 @@ The [draw(Graphics)] function of the [PhysicsBall] class has been overriden by t
 
 
 
-- Mouse Inputs
+### Mouse Inputs
 Added atialiasing to the main [paintComponent] in [Panel] class.
 
 [Player.direction] now follows the mouse cursor through [Mouse Player.mouse.pos], set in the [Panel.mouseMovedOrDragged()].
@@ -21,10 +21,11 @@ Added atialiasing to the main [paintComponent] in [Panel] class.
 [Player]'s polygon's points now react to [Player.vel].
 
 
-- Camera Movement
+### Camera Movement
 [Vector2 mapAnchor] of [PhysicsHandler] now responds to [Vector2 mapAnchorVelocity] in [updatePhysics()]. 
 
 [PhysicsHandler] now accepts a [PhysicsObject mainObject], on which position will update [mapAnchorVelocity] when out of [Boundary boundaries]
+<<<<<<< HEAD
 
 - Camera Movement 2
 [mapAnchor] in now tied to the origin of the objects and affect chunk calculations. [mapAnchor] and objects position have [Vector2 mapAnchorVelocityScaled] added every loop in [updatePhysics()]. 
@@ -32,3 +33,5 @@ Added atialiasing to the main [paintComponent] in [Panel] class.
 >   public double anchorFollowFriction = 0.97;
 
 [drawRecordedChunks(Graphics g)] function added, it will display yellow borders on chunk that have been loaded to the hash map, and fill active chunks green. 
+=======
+>>>>>>> 35afd91abf6b51af523ed1448259ed8170895e5a
