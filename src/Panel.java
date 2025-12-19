@@ -34,21 +34,34 @@ public class Panel extends JPanel implements ActionListener {
     // constructor
     Panel() {
         random = new Random();
-        handler = new PhysicsHandler(100, 100, SCR_WIDTH - 100, SCR_HEIGHT - 100);
+        handler = new PhysicsHandler(200, 200, SCR_WIDTH - 200, SCR_HEIGHT - 200);
 
         Enemy.handler = handler;
-        Normie enemy = new Normie(new Vector2(SCR_WIDTH / 2, SCR_HEIGHT / 2));
 
         player = new Player(new Vector2(SCR_WIDTH / 2, SCR_HEIGHT / 2), Color.cyan, handler);
+        Enemy.player = player;
         handler.mainObject = player;
 
-        handler.addRect(SCR_WIDTH / 2, SCR_HEIGHT - 100, SCR_WIDTH * 2, 50);
+        for (int i = 0; i < 5; i++) {
+            Normie enemy = new Normie(new Vector2(SCR_WIDTH / 2, SCR_HEIGHT / 2));
+        }
+        for (int i = 0; i < 5; i++) {
+            Speedster enemy = new Speedster(new Vector2(SCR_WIDTH / 2, SCR_HEIGHT / 2));
+        }
+        for (int i = 0; i < 5; i++) {
+            Jumper enemy = new Jumper(new Vector2(SCR_WIDTH / 2, SCR_HEIGHT / 2));
+        }
+
+        handler.addRect(SCR_WIDTH / 2, SCR_HEIGHT - 100, SCR_WIDTH * 2, 50); // bottom
+
+        handler.addRect(-SCR_WIDTH / 2, 0, 20, SCR_HEIGHT * 2); // walls
+        handler.addRect(SCR_WIDTH + SCR_WIDTH / 2, 0, 20, SCR_HEIGHT * 2);
+
         handler.addRect(SCR_WIDTH / 2 - 100, SCR_HEIGHT - 200, 500, 50);
         handler.addRect(SCR_WIDTH / 2 + 150, SCR_HEIGHT - 275, 100, 100);
-        handler.addRect(SCR_WIDTH / 2 + 200, SCR_HEIGHT - 500, 250, 100);
-        for (int i = 0; i < 10; i++) {
-            handler.addBall(SCR_WIDTH / 2 + 100, SCR_HEIGHT / 2 - 100, 40, 0.9);
-        }
+        handler.addRect(SCR_WIDTH / 2 + 300, SCR_HEIGHT - 375, 250, 100);
+        handler.addRect(SCR_WIDTH / 2 - 300, SCR_HEIGHT - 400, 300, 25);
+        handler.addRect(SCR_WIDTH / 2 - 0, SCR_HEIGHT - 712, 300, 25);
 
         this.setPreferredSize(new Dimension(SCR_WIDTH, SCR_HEIGHT));
         this.setBackground(new Color(12, 13, 20));
@@ -123,6 +136,18 @@ public class Panel extends JPanel implements ActionListener {
         @Override
         public void keyPressed(KeyEvent e) {
             player.controller.keyPress(e.getKeyCode());
+            if (e.getKeyCode() == KeyEvent.VK_UP) {
+                handler.mapAnchorVelocity.y += handler.anchorFollowVelocity * 2;
+            }
+            if (e.getKeyCode() == KeyEvent.VK_DOWN) {
+                handler.mapAnchorVelocity.y -= handler.anchorFollowVelocity * 2;
+            }
+            if (e.getKeyCode() == KeyEvent.VK_LEFT) {
+                handler.mapAnchorVelocity.x += handler.anchorFollowVelocity * 2;
+            }
+            if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
+                handler.mapAnchorVelocity.x -= handler.anchorFollowVelocity * 2;
+            }
         }
 
         @Override
