@@ -4,8 +4,8 @@ import javax.swing.JFrame;
 
 public class Frame extends JFrame {
     Frame() {
-
-        this.add(new Panel());
+        GameCanvas canvas = new GameCanvas();
+        this.add(canvas);
         this.setTitle("Project");
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setResizable(false);
@@ -13,5 +13,9 @@ public class Frame extends JFrame {
         this.setVisible(true);
         this.setLocationRelativeTo(null);
 
+        canvas.createBufferStrategy(3);
+        canvas.requestFocusInWindow();
+
+        new Thread(canvas).start(); // start game thread
     }
 }

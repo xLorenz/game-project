@@ -111,3 +111,12 @@ Added a few enemy types as examples:
 
 [class Enemy] now overrides [class PhysicsBall][draw(Graphics g)] giving enemies a "bouncy" look, modifyign the oval's height based on [vel.y]
 
+### Renderer Overhaul
+
+Deleted [class Panel extends JPanel] and implemented [class GameCanvas extends Canvas] as the main renderer. 
+
+[setUpGame()] sets up the game ( test for now ) 
+[run()] is the main loop. Inside it Delta Time is calculated along with fps that will now display in the windows title, how cool is that?
+[run()] calls:
+[update(float dt)] runs the physics and player inputs.
+[render()] draws the game using a buffer strategy ( BufferStrategy bs = getBufferStrategy(); ), wrapping everything in do whiles to avoid black frames

@@ -77,7 +77,8 @@ public class Player extends PhysicsBall {
 
     public void handleInputs() {
         // jump
-        if (controller.keys.space.pressed && !airBorne) { // must be on the ground or in coyote timer
+        if ((controller.keys.space.pressed || controller.keys.w.pressed) && !airBorne) {
+            // must be on the ground or in coyote timer
             vel.set(new Vector2(vel.x, -baseJumpHeight));
             airBorne = true;
         }
@@ -103,7 +104,7 @@ public class Player extends PhysicsBall {
             airBorneTimer += dt;
         }
         // falling and coyote time
-        if (vel.y > 0.0) {
+        if (Math.abs(vel.y) > 0.0) {
             airBorneTimer += dt;
             if (airBorneTimer > 0.3) {
                 airBorne = true;
