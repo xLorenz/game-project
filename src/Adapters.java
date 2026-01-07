@@ -30,16 +30,10 @@ public class Adapters {
         public void keyPressed(KeyEvent e) {
             player.controller.keyPress(e.getKeyCode());
             if (e.getKeyCode() == KeyEvent.VK_UP) {
-                handler.mapAnchorVelocity.y += handler.anchorFollowVelocity * 2;
+                handler.displayScale /= 0.8;
             }
             if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-                handler.mapAnchorVelocity.y -= handler.anchorFollowVelocity * 2;
-            }
-            if (e.getKeyCode() == KeyEvent.VK_LEFT) {
-                handler.mapAnchorVelocity.x += handler.anchorFollowVelocity * 2;
-            }
-            if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
-                handler.mapAnchorVelocity.x -= handler.anchorFollowVelocity * 2;
+                handler.displayScale *= 0.8;
             }
         }
 

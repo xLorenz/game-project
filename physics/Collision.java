@@ -1,30 +1,33 @@
 package physics;
 
 public class Collision {
+    private static final double EPSILON = 1e-6;
 
     public static Manifold circleCircle(PhysicsBall b1, PhysicsBall b2) {
 
-        Vector2 distance = b1.pos.sub(b2.pos);
-        int rSum = b1.radius + b2.radius;
+        Vector2 distance = b1.pos.sub(b2.pos); // b2 -> b1
+        double rSum = b1.radius + b2.radius;
 
         double distanceSqrd = distance.lengthSquared();
         if (distanceSqrd >= rSum * rSum)
-            return Manifold.noCollision();
+            return null;
 
         double dist = Math.sqrt(distanceSqrd);
 
-        Manifold m = new Manifold();
+        Manifold m = Manifold.obtain();
+        m.o1 = b1;
+        m.o2 = b2;
         m.collided = true;
 
         // same center or extremely close — pick a stable normal
-        if (dist < 1e-6) {
+        if (dist < EPSILON) {
             m.penetration = rSum;
             m.normal = new Vector2(1, 0);
             m.contacts.add(b1.pos);
         } else {
             m.penetration = rSum - dist;
             m.normal = distance.scale(1.0 / dist);
-            m.contacts.add(b1.pos.add(m.normal.scale(b1.radius - m.penetration * 0.5)));
+            m.contacts.add(b2.pos.add(m.normal.scale(b2.radius - m.penetration * 0.5)));
         }
 
         // ensure normal is normalized
@@ -55,15 +58,20 @@ public class Collision {
         double rSqrd = b.radius * b.radius;
 
         if (distSqrd > rSqrd) {
-            return Manifold.noCollision();
+            return null;
         }
 
-        Manifold m = new Manifold();
+        Manifold m = Manifold.obtain();
+        m.o1 = b;
+        m.o2 = r;
         m.collided = true;
+
+        boolean insideX = Math.abs(clampedX - d.x) < EPSILON;
+        boolean insideY = Math.abs(clampedY - d.y) < EPSILON;
 
         // if circle is exactly on the border ( closest == center )
         // choose the nearest rectangle face as the separation direction
-        if (clampedX == d.x && clampedY == d.y) {
+        if (insideX && insideY) {
 
             double distLeft = Math.abs(d.x + halfW);
             double distTop = Math.abs(d.y + halfH);
@@ -71,50 +79,39 @@ public class Collision {
             double distBottom = Math.abs(halfH - d.y);
 
             // choose smallest distance to a face — that'll be the separation direction
-            double min = distLeft;
-            Vector2 normal = new Vector2(-1, 0); // left default
-            double contactX = r.pos.x - halfW;
-            double contactY = b.pos.y;
+            double minDist = distLeft;
+            Vector2 normal = new Vector2(-1, 0);
 
-            if (distRight < min) { // right face is closest
-                min = distRight;
-                normal.set(1, 0);
-                contactX = r.pos.x + halfW;
-                contactY = b.pos.y;
+            if (distRight < minDist) {
+                minDist = distRight;
+                normal = new Vector2(1, 0);
             }
-
-            if (distTop < min) { // top face is closest
-                min = distTop;
-                normal.set(0, -1);
-                contactX = b.pos.x;
-                contactY = r.pos.y - halfH;
+            if (distTop < minDist) {
+                minDist = distTop;
+                normal = new Vector2(0, -1);
             }
-
-            if (distBottom < min) { // bottom face is closest
-                min = distBottom;
-                normal.set(0, 1);
-                contactX = b.pos.x;
-                contactY = r.pos.y + halfH;
+            if (distBottom < minDist) {
+                minDist = distBottom;
+                normal = new Vector2(0, 1);
             }
 
             // penetration magnitude when center is inside the rect
-            m.penetration = b.radius + min;
+            m.penetration = b.radius + minDist;
             m.normal = normal;
             // approximate contact point as the point on the rect face nearest the circle
-            m.contacts.add(new Vector2(contactX, contactY));
+            Vector2 contactPoint = r.pos.add(normal.scale(-minDist));
+            m.contacts.add(contactPoint);
             // make sure normal is unit length
-            if (m.normal != null)
-                m.normal.normalizeLocal();
             return m;
         }
 
         // normal from closest point to circ
         double dist = Math.sqrt(distSqrd);
         // defensive guard for tiny distances
-        if (dist < 1e-6) {
+        if (dist < EPSILON) {
             // fallback: point from rect center to circle center
             Vector2 fallback = b.pos.sub(r.pos);
-            if (fallback.lengthSquared() < 1e-6) {
+            if (fallback.lengthSquared() < EPSILON) {
                 // choose up
                 m.normal = new Vector2(0, -1);
             } else {
@@ -149,12 +146,14 @@ public class Collision {
 
         double overlapX = Math.min(r1xMax, r2xMax) - Math.max(r1xMin, r2xMin);
         if (overlapX <= 0)
-            return Manifold.noCollision();
+            return null;
         double overlapY = Math.min(r1yMax, r2yMax) - Math.max(r1yMin, r2yMin);
         if (overlapY <= 0)
-            return Manifold.noCollision();
+            return null;
 
-        Manifold m = new Manifold();
+        Manifold m = Manifold.obtain();
+        m.o1 = r1;
+        m.o2 = r2;
         m.collided = true;
 
         if (overlapX < overlapY) {

@@ -1,28 +1,69 @@
 package physics;
 
-import java.awt.Graphics;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.geom.Rectangle2D;
 
 public class PhysicsRect extends PhysicsObject {
     public int width;
     public int height;
+    public Rectangle2D.Float rect = new Rectangle2D.Float();
 
     public PhysicsRect(int width, int height, double mass, long id) {
         super(id);
         this.width = width;
         this.height = height;
         this.mass = mass;
-        this.elasticity = 0.0;
+        this.elasticity = 1.0;
+        this.stationary = true;
+        this.invMass = getInverseMass();
     }
 
     @Override
-    public void update(double gravity, double dt) {
+    public void update(double dt) {
 
     }
 
     @Override
-    public void draw(Graphics g) {
+    public void draw(Graphics2D g, Vector2 offset, double scale) {
+        int cx = (int) (pos.x + offset.x);
+        int cy = (int) (pos.y + offset.y);
+        int xi = cx - width / 2;
+        int yi = cy - height / 2;
+
+        rect.setFrame(xi * scale, yi * scale, width * scale, height * scale);
+
         g.setColor(displayColor);
-        g.fillRect((int) (pos.x - width / 2), (int) (pos.y - height / 2), width, height);
+        g.fill(rect);
+
+        g.setColor(displayColorDarker);
+        g.draw(rect);
+    }
+
+    @Override
+    public void drawDebug(Graphics2D g, Vector2 offset, double scale) {
+        int cx = (int) (pos.x + offset.x);
+        int cy = (int) (pos.y + offset.y);
+        int xi = cx - width / 2;
+        int yi = cy - height / 2;
+
+        rect.setFrame(xi * scale, yi * scale, width * scale, height * scale);
+
+        if (!sleeping) {
+            g.setColor(displayColor);
+        } else {
+            g.setColor(displayColorDarker);
+        }
+
+        g.fill(rect);
+
+        if (!supported) {
+            g.setColor(Color.green);
+        } else {
+            g.setColor(displayColorDarker);
+        }
+
+        g.draw(rect);
     }
 
     public int[] getCorners() {
@@ -38,21 +79,21 @@ public class PhysicsRect extends PhysicsObject {
     }
 
     @Override
-    public int[] getOccuppiedChunks(int chunkDim, Vector2 mapAnchor) {
+    public int[] getOccuppiedChunks(int chunkDim) {
         int[] result = new int[4];
         int[] corners = getCorners();
 
         // corners = [left, top, right, bottom]
-        int left = corners[0] - (int) mapAnchor.x;
-        int top = corners[1] - (int) mapAnchor.y;
-        int right = corners[2] - (int) mapAnchor.x;
-        int bottom = corners[3] - (int) mapAnchor.y;
+        int left = corners[0];
+        int top = corners[1];
+        int right = corners[2];
+        int bottom = corners[3];
 
         // minCx, maxCx, minCy, maxCy
-        result[0] = (int) Math.floor((double) left / chunkDim);
-        result[1] = (int) Math.floor((double) right / chunkDim);
-        result[2] = (int) Math.floor((double) top / chunkDim);
-        result[3] = (int) Math.floor((double) bottom / chunkDim);
+        result[0] = (int) Math.floor((double) left / chunkDim) - 1;
+        result[1] = (int) Math.floor((double) right / chunkDim) + 1;
+        result[2] = (int) Math.floor((double) top / chunkDim) - 1;
+        result[3] = (int) Math.floor((double) bottom / chunkDim) + 1;
 
         return result;
     }

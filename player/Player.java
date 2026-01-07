@@ -1,19 +1,21 @@
 package player;
 
 import java.awt.Color;
-import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Polygon;
 
 import physics.*;
 
 public class Player extends PhysicsBall {
 
+    public PhysicsHandler handler;
+
     public Color color;
     public int health;
     public int baseHealth = 100;
 
     public int baseSpeed = 55;
-    public double baseSprintModifier = 2;
+    public double baseSprintModifier = 1.5;
     public int baseMaxSpeed = 250;
 
     public int baseJumpHeight = 550;
@@ -34,24 +36,26 @@ public class Player extends PhysicsBall {
         super(25, 0.0, 5.0, 0L);
         this.pos = pos;
         this.color = color;
-        this.setListener(new LandingListener());
         this.health = baseHealth;
+        this.forceAwake = true;
+        this.friction = 0.0;
 
-        handler.addBall(this);
+        handler.addObject(this);
+        this.handler = handler;
 
     }
 
     @Override
-    public void draw(Graphics g) {
+    public void draw(Graphics2D g, Vector2 offset, double scale) {
         Polygon shape = new Polygon();
 
         Vector2 v1 = pos.add(direction.rotate(120 * 0).scale(radius * 1.5));
         Vector2 v2 = pos.add(direction.rotate(120 * 1).scale(radius * 1.5).sub(vel.scale(radius * 1.5 / 1000)));
         Vector2 v3 = pos.add(direction.rotate(120 * 2).scale(radius * 1.5).sub(vel.scale(radius * 1.5 / 1000)));
 
-        shape.addPoint((int) (v1.x), (int) (v1.y));
-        shape.addPoint((int) (v2.x), (int) (v2.y));
-        shape.addPoint((int) (v3.x), (int) (v3.y));
+        shape.addPoint((int) ((v1.x + offset.x) * scale), (int) ((v1.y + offset.y) * scale));
+        shape.addPoint((int) ((v2.x + offset.x) * scale), (int) ((v2.y + offset.y) * scale));
+        shape.addPoint((int) ((v3.x + offset.x) * scale), (int) ((v3.y + offset.y) * scale));
 
         Color old = g.getColor();
         g.setColor(color);
@@ -60,24 +64,22 @@ public class Player extends PhysicsBall {
     }
 
     @Override
-    public void update(double gravity, double dt) {
-        vel.y += gravity * dt;
-        pos.addLocal(vel.scale(dt));
-        // friction
-        if (airBorne) {
-            vel.x *= 0.9;
-        } else {
-            vel.x *= 0.85;
-        }
+    public void update(double dt) {
         updateTimers(dt);
+        if (!supported) {
+            airBorneTimer += dt;
+        } else {
+            vel.x *= 0.8;
+            airBorneTimer = 0;
+        }
 
-        direction.set(controller.mouse.pos.sub(pos));
+        direction.set((handler.getMapPos(controller.mouse.pos).sub(pos)));
         direction.normalizeLocal();
     }
 
     public void handleInputs() {
         // jump
-        if ((controller.keys.space.pressed || controller.keys.w.pressed) && !airBorne) {
+        if ((controller.keys.space.pressed || controller.keys.w.pressed) && (supported || airBorneTimer < 0.3)) {
             // must be on the ground or in coyote timer
             vel.set(new Vector2(vel.x, -baseJumpHeight));
             airBorne = true;
@@ -100,15 +102,10 @@ public class Player extends PhysicsBall {
     }
 
     public void updateTimers(double dt) {
-        if (airBorne) {
+        if (!supported) {
             airBorneTimer += dt;
-        }
-        // falling and coyote time
-        if (Math.abs(vel.y) > 0.0) {
-            airBorneTimer += dt;
-            if (airBorneTimer > 0.3) {
-                airBorne = true;
-            }
+        } else {
+            airBorneTimer = 0;
         }
         // damage invulnerability window
         if (invulnerable && invulnerableTimer < 0) {
@@ -127,24 +124,6 @@ public class Player extends PhysicsBall {
             invulnerable = true;
             invulnerableTimer = 1.0; // 1s
             // todo: add vfx and sfx
-        }
-    }
-
-    public class LandingListener extends CollisionListener {
-        public LandingListener() {
-            super();
-        }
-
-        // get collision below the player hitbox
-        @Override
-        public void action(PhysicsObject o, Manifold m) {
-            // collision with rect, which top is below the triangle
-            for (Vector2 c : m.contacts) {
-                if (c.y > pos.y) {
-                    airBorne = false; // reset airborne
-                    airBorneTimer = 0; // reset airborne timer
-                }
-            }
         }
     }
 

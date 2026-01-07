@@ -3,7 +3,7 @@ package enemies;
 import physics.*;
 import player.*;
 import java.awt.Color;
-import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,7 +18,6 @@ public abstract class Enemy extends PhysicsBall {
     public int health;
     public int damage;
 
-    public boolean airBorne = false;
     public double jumpCooldown;
     public double jumpTimer = 0;
 
@@ -31,9 +30,7 @@ public abstract class Enemy extends PhysicsBall {
         this.pos = pos;
         this.displayColor = color;
 
-        this.setListener(new LandingListener());
-
-        handler.addBall(this);
+        handler.addObject(this);
         enemies.add(this);
     }
 
@@ -44,30 +41,30 @@ public abstract class Enemy extends PhysicsBall {
     }
 
     @Override
-    public void draw(Graphics g) {
+    public void draw(Graphics2D g, Vector2 offset, double scale) {
+        int x = (int) (pos.x - radius + offset.x);
+        int y = (int) (pos.y - radius + offset.y);
+
         g.setColor(displayColor);
-        g.fillOval((int) (pos.x - radius), (int) (pos.y - radius), radius * 2,
-                (int) ((radius * 2) - Math.min(vel.y * 0.02, radius)));
+        g.fillOval((int) (x * scale), (int) (y * scale), (int) (radius * 2 * scale),
+                (int) (((radius * 2) - Math.min(vel.y * 0.02, radius)) * scale));
     }
 
     @Override
-    public void update(double gravity, double dt) {
-        vel.y += gravity * dt;
-        pos.addLocal(vel.scale(dt));
+    public void update(double dt) {
 
         updateTimers(dt);
 
-        if (jumpTimer == 0 && !airBorne) {
+        if (jumpTimer == 0 && supported) {
 
             jumpTowardsTarget(pathToPlayer());
             jumpTimer = jumpCooldown;
         }
-        airBorne = true;
     }
 
     public void updateTimers(double dt) {
         if (jumpTimer > 0) {
-            if (!airBorne)
+            if (supported)
                 jumpTimer -= dt;
         } else {
             jumpTimer = 0;
@@ -95,14 +92,14 @@ public abstract class Enemy extends PhysicsBall {
 
         if (difference != 0 && cos != 0) {
             // parabolic throw formula
-            jumpVelocity = Math.sqrt(Math.abs((handler.gravity * dx * dx) / (2 * cos * cos * difference)));
+            jumpVelocity = Math.sqrt(Math.abs((handler.gravity.y * dx * dx) / (2 * cos * cos * difference)));
         }
         // cap velocity
         jumpVelocity = jumpVelocity > maxJumpStrength ? maxJumpStrength : jumpVelocity;
 
         vel.set(cos, sin);
         vel.scaleLocal(jumpVelocity);
-        airBorne = true;
+        supported = false;
     }
 
     public void damage(int damage) {
@@ -117,21 +114,4 @@ public abstract class Enemy extends PhysicsBall {
         // remove from Enemy list and handler objects
     }
 
-    public class LandingListener extends CollisionListener {
-        public LandingListener() {
-            super();
-        }
-
-        // get collision below the player hitbox
-        @Override
-        public void action(PhysicsObject o, Manifold m) {
-            // collision with rect, which top is below the triangle
-            for (Vector2 c : m.contacts) {
-                if (c.y > pos.y) {
-                    airBorne = false; // reset airborne
-                    vel.x *= 0.85; // friction
-                }
-            }
-        }
-    }
 }

@@ -26,8 +26,7 @@ public class GameCanvas extends Canvas implements Runnable {
 
     private Vector2 mousePos = new Vector2();
 
-    private PhysicsHandler handler = new PhysicsHandler((int) (size.width * 0.2), (int) (size.height * 0.2),
-            (int) (size.width * 0.8), (int) (size.height * 0.8));
+    private PhysicsHandler handler = new PhysicsHandler(size.width, size.height);
     private Player player = new Player(new Vector2(size.width / 2, size.height / 2), Color.cyan, handler);
 
     private Adapters adapters = new Adapters(player, handler, mousePos);
@@ -56,34 +55,35 @@ public class GameCanvas extends Canvas implements Runnable {
     }
 
     private void setUpGame() {
-        handler.mainObject = player;
+        handler.anchorFollowRadius = 0;
+        handler.anchorFollowVelocity = 1;
         handler.anchorFollowFriction = 0.95;
-        handler.anchorFollowVelocity = 30;
+        handler.mainObject = player;
         Enemy.handler = handler;
         Enemy.player = player;
 
         // spawn test enemies
         for (int i = 0; i < 10; i++) {
-            new Normie(new Vector2(size.width / 2, size.height / 2));
+            new Normie(new Vector2(size.width / 2, 0));
         }
         for (int i = 0; i < 10; i++) {
-            new Speedster(new Vector2(size.width / 2, size.height / 2));
+            new Speedster(new Vector2(size.width / 2, 0));
         }
         for (int i = 0; i < 10; i++) {
-            new Jumper(new Vector2(size.width / 2, size.height / 2));
+            new Jumper(new Vector2(size.width / 2, 0));
         }
 
         // add "terrain"
-        handler.addRect(size.width / 2, size.height - 100, size.width * 2, 50); // bottom
+        handler.addRect(new Vector2(size.width / 2, size.height - 100), size.width * 2, 50); // bottom
 
-        handler.addRect(-size.width / 2, 0, 20, size.height * 2); // walls
-        handler.addRect(size.width + size.width / 2, 0, 20, size.height * 2);
+        handler.addRect(new Vector2(-size.width / 2, 0), 20, size.height * 2); // walls
+        handler.addRect(new Vector2(size.width + size.width / 2, 0), 20, size.height * 2);
 
-        handler.addRect(size.width / 2 - 100, size.height - 200, 500, 50);
-        handler.addRect(size.width / 2 + 150, size.height - 275, 100, 100);
-        handler.addRect(size.width / 2 + 300, size.height - 375, 250, 100);
-        handler.addRect(size.width / 2 - 300, size.height - 400, 300, 25);
-        handler.addRect(size.width / 2 - 0, size.height - 712, 300, 25);
+        handler.addRect(new Vector2(size.width / 2 - 100, size.height - 200), 500, 50);
+        handler.addRect(new Vector2(size.width / 2 + 150, size.height - 275), 100, 100);
+        handler.addRect(new Vector2(size.width / 2 + 300, size.height - 375), 250, 100);
+        handler.addRect(new Vector2(size.width / 2 - 300, size.height - 400), 300, 25);
+        handler.addRect(new Vector2(size.width / 2 - 0, size.height - 712), 300, 25);
 
     }
 
@@ -127,7 +127,7 @@ public class GameCanvas extends Canvas implements Runnable {
 
                     // draw game
 
-                    handler.displayChunkBorders(g, size.width, size.height);
+                    // handler.displayChunkBorders(g, size.width, size.height);
                     // handler.drawRecordedChunks(g);
                     handler.displayObjects(g);
                     // collision debug overlay
