@@ -27,7 +27,7 @@ public class GameCanvas extends Canvas implements Runnable {
     private Vector2 mousePos = new Vector2();
 
     private PhysicsHandler handler = new PhysicsHandler(size.width, size.height);
-    private Player player = new Player(new Vector2(size.width / 2, size.height / 2), Color.cyan, handler);
+    private Player player = new Player(new Vector2(size.width / 2, 0), Color.cyan, handler);
 
     private Adapters adapters = new Adapters(player, handler, mousePos);
 
@@ -55,6 +55,7 @@ public class GameCanvas extends Canvas implements Runnable {
     }
 
     private void setUpGame() {
+        handler.displayScale = 0.2;
         handler.anchorFollowRadius = 0;
         handler.anchorFollowVelocity = 1;
         handler.anchorFollowFriction = 0.95;
@@ -63,21 +64,21 @@ public class GameCanvas extends Canvas implements Runnable {
         Enemy.player = player;
 
         // spawn test enemies
-        for (int i = 0; i < 10; i++) {
-            new Normie(new Vector2(size.width / 2, 0));
+        for (int i = 0; i < 20; i++) {
+            new Normie(new Vector2(size.width / 2, -100));
         }
-        for (int i = 0; i < 10; i++) {
-            new Speedster(new Vector2(size.width / 2, 0));
+        for (int i = 0; i < 20; i++) {
+            new Speedster(new Vector2(size.width / 2, -120));
         }
-        for (int i = 0; i < 10; i++) {
-            new Jumper(new Vector2(size.width / 2, 0));
+        for (int i = 0; i < 20; i++) {
+            new Jumper(new Vector2(size.width / 2, -140));
         }
 
         // add "terrain"
-        handler.addRect(new Vector2(size.width / 2, size.height - 100), size.width * 2, 50); // bottom
+        handler.addRect(new Vector2(size.width / 2, size.height + 150), size.width * 10, 500); // bottom
 
-        handler.addRect(new Vector2(-size.width / 2, 0), 20, size.height * 2); // walls
-        handler.addRect(new Vector2(size.width + size.width / 2, 0), 20, size.height * 2);
+        handler.addRect(new Vector2(-size.width * 4, 0), 20, size.height * 2); // walls
+        handler.addRect(new Vector2(size.width * 5, 0), 20, size.height * 2);
 
         handler.addRect(new Vector2(size.width / 2 - 100, size.height - 200), 500, 50);
         handler.addRect(new Vector2(size.width / 2 + 150, size.height - 275), 100, 100);

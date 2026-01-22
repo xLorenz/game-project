@@ -42,12 +42,31 @@ public abstract class Enemy extends PhysicsBall {
 
     @Override
     public void draw(Graphics2D g, Vector2 offset, double scale) {
-        int x = (int) (pos.x - radius + offset.x);
-        int y = (int) (pos.y - radius + offset.y);
+        double diameter = radius * 2.0;
+
+        // Tune these values
+        double stretchFactor = 0.04; // how sensitive stretch is to velocity
+        double maxStretch = radius; // max extra height (in world units)
+
+        // Compute vertical stretch
+        double stretch = vel.y * stretchFactor;
+        stretch = Math.max(-maxStretch, Math.min(maxStretch, stretch));
+
+        double width = diameter;
+        double height = diameter + Math.abs(stretch);
+
+        // Anchor logic:
+        // - Falling (vel.y > 0): stretch downward
+        // - Rising (vel.y < 0): stretch upward
+        double yOffset = (vel.y > 0) ? -stretch : 0;
+
+        int x = (int) ((pos.x - radius + offset.x) * scale);
+        int y = (int) ((pos.y - radius + yOffset + offset.y) * scale);
+        int w = (int) (width * scale);
+        int h = (int) (height * scale);
 
         g.setColor(displayColor);
-        g.fillOval((int) (x * scale), (int) (y * scale), (int) (radius * 2 * scale),
-                (int) (((radius * 2) - Math.min(vel.y * 0.02, radius)) * scale));
+        g.fillOval(x, y, w, h);
     }
 
     @Override

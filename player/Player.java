@@ -24,7 +24,6 @@ public class Player extends PhysicsBall {
 
     public Controller controller = new Controller();
 
-    public boolean airBorne = false;
     public double airBorneTimer = 0.0;
 
     public boolean invulnerable = false;
@@ -33,7 +32,7 @@ public class Player extends PhysicsBall {
     public boolean sprinting = false;
 
     public Player(Vector2 pos, Color color, PhysicsHandler handler) {
-        super(25, 0.0, 5.0, 0L);
+        super(25, 0.1, 10.0, 0L);
         this.pos = pos;
         this.color = color;
         this.health = baseHealth;
@@ -79,10 +78,12 @@ public class Player extends PhysicsBall {
 
     public void handleInputs() {
         // jump
-        if ((controller.keys.space.pressed || controller.keys.w.pressed) && (supported || airBorneTimer < 0.3)) {
+        boolean jump = (controller.keys.space.pressed || controller.keys.w.pressed);
+        boolean allowed = (supported || airBorneTimer < 0.3);
+
+        if (jump && allowed) {
             // must be on the ground or in coyote timer
             vel.set(new Vector2(vel.x, -baseJumpHeight));
-            airBorne = true;
         }
 
         // walk left
