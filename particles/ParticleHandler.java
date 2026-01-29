@@ -1,19 +1,53 @@
 package particles;
 
 import java.util.ArrayList;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.Collections;
+import java.util.List;
 
 public class ParticleHandler {
 
     // owns active particles and orcheswtration
 
-    private ConcurrentLinkedQueue<Particle> activeParticles;
-    private Long nextId = 0L;
-    private ArrayList<ParticleGenerator> generators = new ArrayList<ParticleGenerator>();
+    private final List<Particle> updateParticles = new ArrayList<>(); // mutated by updater adn gen
+    private volatile List<Particle> renderParticles = Collections.emptyList(); // volatile snapshot for renderer
 
-    public void updateParticles(double dt) {
-        particles.forEach((id, particle) -> particle.update(dt));
+    public ParticleHandler() {
+    }
+
+    public void swapBuffers() {
+        synchronized (this) {
+            List<Particle> temp = renderParticles;
+            renderParticles.clear();
+            renderParticles.addAll(updateParticles);
+
+            updateParticles.clear();
+            updateParticles.addAll(temp);
+        }
+    }
+
+    // called by generator
+    public void addParticle(Particle p) {
+        synchronized (updateParticles) {
+            updateParticles.add(p);
+        }
+    }
+
+    public void publishFrame() {
+        synchronized (updateParticles) {
+            renderParticles = new ArrayList<>(updateParticles); // snapshot copy
+        }
+    }
+
+    public ParticlePool<Particle> getPool() {
+        return pool;
+    }
+
+    public List<Particle> getUpdateParticles() {
+        return updateParticles;
+    }
+
+    public List<Particle> getRenderParticles() {
+        return renderParticles; // EDT reads only
     }
 
 }

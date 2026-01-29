@@ -1,30 +1,46 @@
 package particles;
 
 import physics.Vector2;
-import java.awt.Graphics2D;
 
 public abstract class Particle {
 
-    boolean active;
+    protected final Vector2 pos = new Vector2();
+    protected final Vector2 vel = new Vector2();
 
-    final Vector2 pos = new Vector2();
-    final Vector2 vel = new Vector2();
+    protected boolean alive;
+    protected double life;
+    protected double size;
 
-    double life;
+    public abstract void draw(ParticleRenderer renderer);
 
-    abstract void update(double dt);
+    public abstract void free(); // Concrete classes MUST implement this so updater can return the instance to
+                                 // the correct static pool when the particle dies.
 
-    abstract void draw(Graphics2D g, Vector2 offset, double scale);
+    public void update(double dt) {
+        updateLife(dt);
+        pos.addLocal(vel.scale(dt));
+    }
 
-    void reset(Vector2 pos, Vector2 vel, double life) {
+    public void updateLife(double dt) {
+        life -= dt;
+        if (life <= 0f)
+            deactivate();
+    }
+
+    public void reset(Vector2 pos, Vector2 vel, double size, double life) {
         this.pos.set(pos);
         this.vel.set(vel);
         this.life = life;
-        this.active = true;
+        this.size = size;
+        this.alive = true;
     }
 
     void deactivate() {
-        active = false;
+        alive = false;
+    }
+
+    public boolean isAlive() {
+        return alive;
     }
 
 }
