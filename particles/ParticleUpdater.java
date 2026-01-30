@@ -48,7 +48,6 @@ public class ParticleUpdater implements Runnable {
 
     private void fixedUpdate() {
         List<Particle> particles = handler.getUpdateParticles();
-        ParticlePool<Particle> pool = handler.getPool();
 
         synchronized (particles) {
             Iterator<Particle> it = particles.iterator();
@@ -57,7 +56,7 @@ public class ParticleUpdater implements Runnable {
                 p.update(FIXED_DT);
                 if (!p.isAlive()) {
                     it.remove();
-                    pool.free(p);
+                    p.free();
                 }
             }
         }

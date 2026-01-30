@@ -1,20 +1,30 @@
 package particles;
 
+import java.util.Random;
+
 import physics.Vector2;
 
 public abstract class Particle {
+
+    protected static ParticleHandler handler;
+
+    protected static final Random rand = new Random();
 
     protected final Vector2 pos = new Vector2();
     protected final Vector2 vel = new Vector2();
 
     protected boolean alive;
     protected double life;
-    protected double size;
+    protected double size = 1.0;
 
-    public abstract void draw(ParticleRenderer renderer);
+    public abstract void draw(BatchRenderer renderer);
 
     public abstract void free(); // Concrete classes MUST implement this so updater can return the instance to
                                  // the correct static pool when the particle dies.
+
+    public static void setHandler(ParticleHandler h) {
+        handler = h;
+    }
 
     public void update(double dt) {
         updateLife(dt);

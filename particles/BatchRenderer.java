@@ -10,18 +10,20 @@ import physics.Vector2;
 
 import java.awt.Color;
 
-public class ParticleRenderer {
+public class BatchRenderer {
 
-    // reads inmutable snapshot
     // batch renderer
 
     private Graphics2D g;
     private PhysicsHandler pHandler;
     private final Ellipse2D.Float circle = new Ellipse2D.Float();
 
-    public void begin(Graphics2D g, PhysicsHandler pHandler) {
+    public void setPhysicsHandler(PhysicsHandler p) {
+        this.pHandler = p;
+    }
+
+    public void setGraphics(Graphics2D g) {
         this.g = g;
-        this.pHandler = pHandler;
     }
 
     public void setFill(Color c, int alpha) {

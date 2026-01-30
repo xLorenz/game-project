@@ -1,8 +1,11 @@
 package particles;
 
+import java.awt.Graphics2D;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import physics.PhysicsHandler;
 
 public class ParticleHandler {
 
@@ -11,7 +14,12 @@ public class ParticleHandler {
     private final List<Particle> updateParticles = new ArrayList<>(); // mutated by updater adn gen
     private volatile List<Particle> renderParticles = Collections.emptyList(); // volatile snapshot for renderer
 
-    public ParticleHandler() {
+    private final BatchRenderer renderer = new BatchRenderer();
+    private final ParticleUpdater updater = new ParticleUpdater(this);
+
+    public ParticleHandler(PhysicsHandler pHandler) {
+        renderer.setPhysicsHandler(pHandler);
+        Particle.setHandler(this);
     }
 
     public void swapBuffers() {
@@ -38,16 +46,27 @@ public class ParticleHandler {
         }
     }
 
-    public ParticlePool<Particle> getPool() {
-        return pool;
+    public void render(Graphics2D g) {
+        renderer.setGraphics(g);
+        for (Particle p : getRenderParticles()) {
+            p.draw(renderer);
+        }
     }
 
     public List<Particle> getUpdateParticles() {
         return updateParticles;
     }
 
+    public ParticleUpdater getUpdater() {
+        return updater;
+    }
+
     public List<Particle> getRenderParticles() {
         return renderParticles; // EDT reads only
+    }
+
+    public BatchRenderer getRenderer() {
+        return renderer;
     }
 
 }

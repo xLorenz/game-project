@@ -1,5 +1,6 @@
-TODO: implement ParticleGenerator per concrete class 
+# Particles
 
-    SimpleParticle.emit(Vector2 pos, Vector2 vel, double size, double life);
+Particle handler has all the particles as well as snapshots of them for the renderer.
+Particles will update in ParticleUpdater's own thread, and render using BatchRenderer rendering. 
 
-Make a static generator per class 
+Each concrete Particle class has its own ParticlePool, as well as its own emit() and free() methods.

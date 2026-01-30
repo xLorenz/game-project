@@ -13,6 +13,7 @@ import javax.swing.SwingUtilities;
 
 import player.*;
 import enemies.*;
+import particles.ParticleHandler;
 import physics.*;
 
 public class GameCanvas extends Canvas implements Runnable {
@@ -27,7 +28,11 @@ public class GameCanvas extends Canvas implements Runnable {
     private Vector2 mousePos = new Vector2();
 
     private PhysicsHandler handler = new PhysicsHandler(size.width, size.height);
+    private ParticleHandler particleHandler = new ParticleHandler(handler);
     private Player player = new Player(new Vector2(size.width / 2, 0), Color.cyan, handler);
+
+    private Thread updaterThread;
+    private Thread gameThread;
 
     private Adapters adapters = new Adapters(player, handler, mousePos);
 
@@ -38,6 +43,36 @@ public class GameCanvas extends Canvas implements Runnable {
     static {
         HINTS.put(RenderingHints.KEY_STROKE_CONTROL,
                 RenderingHints.VALUE_STROKE_NORMALIZE);
+    }
+
+    @Override
+    public void addNotify() {
+        super.addNotify(); // IMPORTANT
+
+        if (getBufferStrategy() == null) {
+            createBufferStrategy(2);
+        }
+
+        if (updaterThread == null || !updaterThread.isAlive()) {
+            updaterThread = new Thread(particleHandler.getUpdater(), "Particle-Updater");
+            updaterThread.setDaemon(true);
+            updaterThread.start();
+        }
+        if (!Thread.currentThread().getName().equals("AWT-EventQueue-0")) {
+            // typically you start your game loop on your own; if you want to start here:
+            gameThread = new Thread(this, "GameLoop");
+            gameThread.setDaemon(true);
+            gameThread.start();
+        }
+    }
+
+    @Override
+    public void removeNotify() {
+        if (particleHandler.getUpdater() != null) {
+            particleHandler.getUpdater().stop();
+        }
+
+        super.removeNotify();
     }
 
     public GameCanvas() {
@@ -56,7 +91,7 @@ public class GameCanvas extends Canvas implements Runnable {
 
     private void setUpGame() {
         handler.displayScale = 0.2;
-        handler.anchorFollowRadius = 0;
+        handler.anchorFollowRadius = 50;
         handler.anchorFollowVelocity = 1;
         handler.anchorFollowFriction = 0.95;
         handler.mainObject = player;
@@ -114,8 +149,13 @@ public class GameCanvas extends Canvas implements Runnable {
 
     private void render() {
         BufferStrategy bs = getBufferStrategy();
-        if (bs == null)
-            return;
+        if (bs == null) {
+            // create if missing (defensive), but prefer create in addNotify()
+            createBufferStrategy(2);
+            bs = getBufferStrategy();
+            if (bs == null)
+                return;
+        }
 
         do {
             do {
@@ -133,6 +173,7 @@ public class GameCanvas extends Canvas implements Runnable {
                     handler.displayObjects(g);
                     // collision debug overlay
                     // handler.displayCollisionDebug(g);
+                    particleHandler.render(g);
 
                 } finally {
                     g.dispose();

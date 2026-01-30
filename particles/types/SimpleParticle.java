@@ -4,7 +4,7 @@ import java.awt.Color;
 
 import particles.Particle;
 import particles.ParticlePool;
-import particles.ParticleRenderer;
+import particles.BatchRenderer;
 import physics.Vector2;
 
 public class SimpleParticle extends Particle {
@@ -13,8 +13,9 @@ public class SimpleParticle extends Particle {
     private static final ParticlePool<SimpleParticle> POOL = new ParticlePool<>(1500, SimpleParticle::new,
             false);
 
+    private static Color defColor = new Color(200, 200, 200, 220);
     private Color color = new Color(200, 200, 200, 220);
-    private int radius = 10;
+    private int radius = 5;
 
     private SimpleParticle() {
     }
@@ -29,8 +30,22 @@ public class SimpleParticle extends Particle {
         return p;
     }
 
+    public static void emit(Vector2 pos, Vector2 vel, double size, double life, Color color) {
+        SimpleParticle p = SimpleParticle.obtain(pos, vel, size, life, color);
+        handler.addParticle(p);
+    }
+
+    public static void emit(Vector2 pos) {
+        Vector2 vel = new Vector2(rand.nextInt(100) - 50, rand.nextInt(10) - 5);
+        double life = 1.0 + rand.nextInt(20) / 10;
+        double size = 1.0 + rand.nextInt(20) / 10;
+
+        SimpleParticle p = SimpleParticle.obtain(pos, vel, size, life, defColor);
+        handler.addParticle(p);
+    }
+
     @Override
-    public void draw(ParticleRenderer renderer) {
+    public void draw(BatchRenderer renderer) {
         // fade out
         double lifeFrac = Math.max(0f, Math.min(1f, life / 2f));
         int alpha = (int) (255 * lifeFrac);

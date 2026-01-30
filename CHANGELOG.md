@@ -120,3 +120,15 @@ Deleted [class Panel extends JPanel] and implemented [class GameCanvas extends C
 [run()] calls:
 [update(float dt)] runs the physics and player inputs.
 [render()] draws the game using a buffer strategy ( BufferStrategy bs = getBufferStrategy(); ), wrapping everything in do whiles to avoid black frames
+
+## Physics update
+Updated physics, eliminating the parameter [airBorne] from all entities and replacing with [supported], inherited from physics objects.
+
+### Particles update
+
+Implemented particles, particle pooling, rendering and updating.
+[ParticleUpdater] thread starts in [GameCanvas]'s [addNotify()] and [ParticleHandler.render(Graphics2D g)] runs in [GameCanvas.render()]. 
+
+Implemented particles for player landing, jumping and sprinting using [SimpleParticle]s.
+
+All particle concrete classes shall be inside [/particles/types].
