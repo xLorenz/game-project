@@ -3,12 +3,15 @@ package player;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Polygon;
+import java.util.Random;
 
+import particles.types.SimpleParticle;
 import physics.*;
 
 public class Player extends PhysicsBall {
 
     public PhysicsHandler handler;
+    private Random rand = new Random();
 
     public Color color;
     public int health;
@@ -18,13 +21,12 @@ public class Player extends PhysicsBall {
     public double baseSprintModifier = 1.5;
     public int baseMaxSpeed = 250;
 
-    public int baseJumpHeight = 550;
+    public int baseJumpHeight = 600;
 
     public Vector2 direction = new Vector2(1, 0);
 
     public Controller controller = new Controller();
 
-    public boolean airBorne = false;
     public double airBorneTimer = 0.0;
 
     public boolean invulnerable = false;
@@ -33,7 +35,7 @@ public class Player extends PhysicsBall {
     public boolean sprinting = false;
 
     public Player(Vector2 pos, Color color, PhysicsHandler handler) {
-        super(25, 0.0, 5.0, 0L);
+        super(25, 0.1, 10.0, 0L);
         this.pos = pos;
         this.color = color;
         this.health = baseHealth;
@@ -66,11 +68,8 @@ public class Player extends PhysicsBall {
     @Override
     public void update(double dt) {
         updateTimers(dt);
-        if (!supported) {
-            airBorneTimer += dt;
-        } else {
+        if (supported) {
             vel.x *= 0.8;
-            airBorneTimer = 0;
         }
 
         direction.set((handler.getMapPos(controller.mouse.pos).sub(pos)));
@@ -79,10 +78,17 @@ public class Player extends PhysicsBall {
 
     public void handleInputs() {
         // jump
-        if ((controller.keys.space.pressed || controller.keys.w.pressed) && (supported || airBorneTimer < 0.3)) {
+        boolean jump = (controller.keys.space.pressed || controller.keys.w.pressed);
+        boolean allowed = (supported || airBorneTimer < 0.3);
+
+        if (jump && allowed) {
             // must be on the ground or in coyote timer
             vel.set(new Vector2(vel.x, -baseJumpHeight));
-            airBorne = true;
+
+            for (int i = 0; i < 20; i++) {
+                SimpleParticle.emit(new Vector2(pos.x, pos.y + radius));
+            }
+            airBorneTimer = 0.3;
         }
 
         // walk left
@@ -90,11 +96,25 @@ public class Player extends PhysicsBall {
             if (vel.x > (sprinting ? -baseMaxSpeed * baseSprintModifier : -baseMaxSpeed)) {
                 vel.x -= sprinting ? baseSpeed * baseSprintModifier : baseSpeed;
             }
+            if (sprinting && vel.x < 0 && supported) {
+                SimpleParticle.emit(new Vector2(pos.x, pos.y + radius),
+                        new Vector2(rand.nextInt(50), rand.nextInt(50) * -1),
+                        0.75 + rand.nextInt(20) / 10,
+                        1,
+                        color);
+            }
         }
         // walk right
         if (controller.keys.d.pressed) {
             if (vel.x < (sprinting ? baseMaxSpeed * baseSprintModifier : baseMaxSpeed)) {
                 vel.x += sprinting ? baseSpeed * baseSprintModifier : baseSpeed;
+            }
+            if (sprinting && vel.x > 0 && supported) {
+                SimpleParticle.emit(new Vector2(pos.x, pos.y + radius),
+                        new Vector2(rand.nextInt(50) * -1, rand.nextInt(50) * -1),
+                        0.75 + rand.nextInt(20) / 10,
+                        1,
+                        color);
             }
         }
         // sprint
@@ -105,6 +125,12 @@ public class Player extends PhysicsBall {
         if (!supported) {
             airBorneTimer += dt;
         } else {
+
+            if (airBorneTimer > 0) {
+                for (int i = 0; i < airBorneTimer * 10; i++) {
+                    SimpleParticle.emit(new Vector2(pos.x, pos.y + radius));
+                }
+            }
             airBorneTimer = 0;
         }
         // damage invulnerability window
