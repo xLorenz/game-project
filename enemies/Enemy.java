@@ -81,6 +81,13 @@ public abstract class Enemy extends PhysicsBall {
             jumpTowardsTarget(pathToPlayer());
             jumpTimer = jumpCooldown;
         }
+
+        // hit player
+        for (Contact c : contacts) {
+            if (c.other == player) {
+                player.damage(damage);
+            }
+        }
     }
 
     public void updateTimers(double dt) {

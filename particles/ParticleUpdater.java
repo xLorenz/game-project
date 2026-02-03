@@ -53,10 +53,12 @@ public class ParticleUpdater implements Runnable {
             Iterator<Particle> it = particles.iterator();
             while (it.hasNext()) {
                 Particle p = it.next();
-                p.update(FIXED_DT);
-                if (!p.isAlive()) {
-                    it.remove();
-                    p.free();
+                if (p != null) {
+                    p.update(FIXED_DT);
+                    if (!p.isAlive()) {
+                        it.remove();
+                        p.free();
+                    }
                 }
             }
         }

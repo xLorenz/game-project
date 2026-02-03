@@ -23,15 +23,17 @@ public class HealthManager {
         }
     }
 
-    public void damage(int ammount) {
-        if (vulnerable) {
+    public boolean damage(int ammount) {
+        if (vulnerable && health > 0) {
 
             setInvulnerability();
 
             health -= ammount;
             if (health < 0)
                 health = 0;
+            return true;
         }
+        return false;
     }
 
     public void setInvulnerability() {

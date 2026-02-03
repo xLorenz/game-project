@@ -90,7 +90,7 @@ public class GameCanvas extends Canvas implements Runnable {
     }
 
     private void setUpGame() {
-        handler.displayScale = 0.2;
+        handler.displayScale = 0.5;
         handler.anchorFollowRadius = 100;
         handler.anchorFollowVelocity = 0.5;
         handler.anchorFollowFriction = 0.95;
@@ -168,12 +168,14 @@ public class GameCanvas extends Canvas implements Runnable {
 
                     // draw game
 
+                    particleHandler.renderBgParticles(g);
+
                     // handler.displayChunkBorders(g, size.width, size.height);
                     // handler.drawRecordedChunks(g);
                     handler.displayObjects(g);
                     // collision debug overlay
                     // handler.displayCollisionDebug(g);
-                    particleHandler.render(g);
+                    particleHandler.renderFgParticles(g);
 
                 } finally {
                     g.dispose();

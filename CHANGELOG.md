@@ -167,3 +167,17 @@ Added to [Vector2].
        > static Vector2 random(int[] xBounds, int[] yBounds)
 
 Returns a random vector within bounds
+
+### Background particles and player damage
+
+Fixed a nullPointerError in [ParticleUpdater] and [ParticleHandler.render()]
+
+Fixed an error in [HealthManager] allowing damage if not vulnerable.
+
+Enemies now damage the player. Damage will emit [TriangleParticle] and player renders with [Player.color.darker()] when not vulnerable.
+
+Implemented the [public boolean background] param for particles, set to false by default.
+
+Implemented [renderBgParticles()] and [renderFgParticles()] in [ParticleHandler].
+
+Added [SimpleBackgroundParticle] to particle types

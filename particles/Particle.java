@@ -13,6 +13,7 @@ public abstract class Particle {
     protected final Vector2 pos = new Vector2();
     protected final Vector2 vel = new Vector2();
 
+    public boolean background = false;
     protected boolean alive;
     protected double life;
     protected double size = 1.0;

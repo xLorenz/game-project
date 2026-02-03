@@ -1,9 +1,9 @@
 package physics;
 
-class Contact {
-    PhysicsObject other;
-    Vector2 normal; // normal pointing from other -> this
-    double penetration;
+public class Contact {
+    public PhysicsObject other;
+    public Vector2 normal; // normal pointing from other -> this
+    public double penetration;
 
     // Simple object pool
     private static final java.util.ArrayDeque<Contact> POOL = new java.util.ArrayDeque<>();

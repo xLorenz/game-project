@@ -11,7 +11,7 @@ public class ParticleHandler {
 
     // owns active particles and orcheswtration
 
-    private final List<Particle> updateParticles = new ArrayList<>(); // mutated by updater adn gen
+    private final List<Particle> updateParticles = new ArrayList<>(); // mutated by updater and gen
     private volatile List<Particle> renderParticles = Collections.emptyList(); // volatile snapshot for renderer
 
     private final BatchRenderer renderer = new BatchRenderer();
@@ -49,7 +49,26 @@ public class ParticleHandler {
     public void render(Graphics2D g) {
         renderer.setGraphics(g);
         for (Particle p : getRenderParticles()) {
-            p.draw(renderer);
+            if (p != null)
+                p.draw(renderer);
+        }
+    }
+
+    public void renderFgParticles(Graphics2D g) {
+        renderer.setGraphics(g);
+        for (Particle p : getRenderParticles()) {
+            if (p != null)
+                if (!p.background)
+                    p.draw(renderer);
+        }
+    }
+
+    public void renderBgParticles(Graphics2D g) {
+        renderer.setGraphics(g);
+        for (Particle p : getRenderParticles()) {
+            if (p != null)
+                if (p.background)
+                    p.draw(renderer);
         }
     }
 

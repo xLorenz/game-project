@@ -5,6 +5,7 @@ import java.awt.Graphics2D;
 import java.awt.Polygon;
 import java.util.Random;
 
+import particles.types.SimpleBackgroundParticle;
 import particles.types.SimpleParticle;
 import particles.types.TriangleParticle;
 import physics.*;
@@ -78,11 +79,14 @@ public class Player extends PhysicsBall {
         if (supported) {
             vel.x *= 0.8;
         } else {
-            TriangleParticle.emit(pos);
+            // TriangleParticle.emit(pos);
         }
 
         direction.set((handler.getMapPos(controller.mouse.pos).sub(pos)));
         direction.normalizeLocal();
+
+        if (rand.nextInt(200) == 1)
+            SimpleBackgroundParticle.emit(pos.add(Vector2.random(-1000, 1000, -1000, 1000)));
 
     }
 
@@ -141,9 +145,10 @@ public class Player extends PhysicsBall {
     }
 
     public void damage(int ammount) {
-        healthManager.damage(ammount);
-        for (int i = 0; i < 50; i++) {
-            TriangleParticle.emit(pos);
+        if (healthManager.damage(ammount)) {
+            for (int i = 0; i < 10 * ammount; i++) {
+                TriangleParticle.emit(pos);
+            }
         }
     }
 
