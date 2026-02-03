@@ -91,8 +91,8 @@ public class GameCanvas extends Canvas implements Runnable {
 
     private void setUpGame() {
         handler.displayScale = 0.2;
-        handler.anchorFollowRadius = 50;
-        handler.anchorFollowVelocity = 1;
+        handler.anchorFollowRadius = 100;
+        handler.anchorFollowVelocity = 0.5;
         handler.anchorFollowFriction = 0.95;
         handler.mainObject = player;
         Enemy.handler = handler;

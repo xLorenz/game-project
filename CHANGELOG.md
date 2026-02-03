@@ -132,3 +132,38 @@ Implemented particles, particle pooling, rendering and updating.
 Implemented particles for player landing, jumping and sprinting using [SimpleParticle]s.
 
 All particle concrete classes shall be inside [/particles/types].
+
+### Combat implementation infrastructure
+
+Added [HealthManager] to control the players health.
+
+    Methods:
+        > void updateTimers(double dt) // updates the invulnerability cd
+        >  void damage(int ammount) // deals damage and sets invulnerable
+        > void setInvulnerability() // sets invulnerability timer to de default value
+        > void setInvulnerability(double time) // sets invulnerability for the input ammount
+        > double getPercent() // returns the percentage of health from maxHealth
+        > void regenerateHealth(int ammount) // adds ammount to health
+
+
+Added to [BatchRenderer].
+    
+    Methods:
+        > void drawRect(Vector2 pos, double w, double h)
+        > void drawSquare(Vector2 pos, double w)
+        > void drawTriangle(Vector2 a, Vector2 b, Vector2 c)
+        > void drawPolygon(Vector2[] verts, int count)
+
+These methods allow for batch rendering of different shapes particles.
+Added [TriangleParticle], a spinning fading out triangle.
+Added [PhysicsParticle], a SimpleParticle that reacts to gravity.
+
+Added to [Vector2].
+
+    Methods:
+       > static Vector2 random(int xMin, int xMax, int yMin, int yMax)
+       >  static Vector2 random(double xMin, double xMax, double yMin, double yMax) 
+       > static Vector2 random(Vector2 corner1, Vector2 corner2)
+       > static Vector2 random(int[] xBounds, int[] yBounds)
+
+Returns a random vector within bounds

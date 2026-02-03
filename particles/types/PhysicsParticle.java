@@ -7,22 +7,22 @@ import particles.ParticlePool;
 import particles.BatchRenderer;
 import physics.Vector2;
 
-public class SimpleParticle extends Particle {
+public class PhysicsParticle extends Particle {
 
     // Per-class pool: tune initialSize and allowGrowth as needed.
-    private static final ParticlePool<SimpleParticle> POOL = new ParticlePool<>(1500, SimpleParticle::new,
+    private static final ParticlePool<PhysicsParticle> POOL = new ParticlePool<>(1500, PhysicsParticle::new,
             false);
 
     private static Color defColor = new Color(200, 200, 200, 220);
     private Color color = new Color(200, 200, 200, 220);
     private int radius = 5;
 
-    private SimpleParticle() {
+    private PhysicsParticle() {
     }
 
     /** Static factory: obtains from the class pool and initializes it. */
-    public static SimpleParticle obtain(Vector2 pos, Vector2 vel, double size, double life, Color color) {
-        SimpleParticle p = POOL.obtain();
+    public static PhysicsParticle obtain(Vector2 pos, Vector2 vel, double size, double life, Color color) {
+        PhysicsParticle p = POOL.obtain();
         if (p == null)
             return null; // pool exhausted and growth disallowed
         p.reset(pos, vel, size, life);
@@ -31,16 +31,16 @@ public class SimpleParticle extends Particle {
     }
 
     public static void emit(Vector2 pos, Vector2 vel, double size, double life, Color color) {
-        SimpleParticle p = SimpleParticle.obtain(pos, vel, size, life, color);
+        PhysicsParticle p = PhysicsParticle.obtain(pos, vel, size, life, color);
         handler.addParticle(p);
     }
 
     public static void emit(Vector2 pos) {
-        Vector2 vel = Vector2.random(-50, 50, -15, 5);
+        Vector2 vel = new Vector2(rand.nextInt(100) - 50, rand.nextInt(20) - 5);
         double life = 1.0 + rand.nextInt(20) / 10;
         double size = 1.0 + rand.nextInt(20) / 10;
 
-        SimpleParticle p = SimpleParticle.obtain(pos, vel, size, life, defColor);
+        PhysicsParticle p = PhysicsParticle.obtain(pos, vel, size, life, defColor);
         handler.addParticle(p);
     }
 
@@ -52,6 +52,12 @@ public class SimpleParticle extends Particle {
 
         renderer.setFill(color, alpha);
         renderer.drawCircle(pos, (int) (radius * size));
+    }
+
+    @Override
+    public void update(double dt) {
+        super.update(dt);
+        vel.y += 980 * dt;
     }
 
     @Override

@@ -1,6 +1,10 @@
 package physics;
 
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
+
 public class Vector2 {
+    public static Random rand = new Random();
     public double x, y;
 
     public Vector2() {
@@ -10,6 +14,54 @@ public class Vector2 {
     public Vector2(double x, double y) {
         this.x = x;
         this.y = y;
+    }
+
+    public static Vector2 random(int xMin, int xMax, int yMin, int yMax) {
+        if (xMin > xMax) {
+            int t = xMin;
+            xMin = xMax;
+            xMax = t;
+        }
+        if (yMin > yMax) {
+            int t = yMin;
+            yMin = yMax;
+            yMax = t;
+        }
+
+        int x = ThreadLocalRandom.current().nextInt(xMin, xMax + 1);
+        int y = ThreadLocalRandom.current().nextInt(yMin, yMax + 1);
+
+        return new Vector2(x, y);
+
+    }
+
+    public static Vector2 random(double xMin, double xMax, double yMin, double yMax) {
+        if (xMin > xMax) {
+            double t = xMin;
+            xMin = xMax;
+            xMax = t;
+        }
+        if (yMin > yMax) {
+            double t = yMin;
+            yMin = yMax;
+            yMax = t;
+        }
+
+        double x = ThreadLocalRandom.current().nextDouble(xMin, xMax);
+        double y = ThreadLocalRandom.current().nextDouble(yMin, yMax);
+
+        return new Vector2(x, y);
+    }
+
+    public static Vector2 random(int[] xBounds, int[] yBounds) {
+        if (xBounds == null || yBounds == null || xBounds.length != 2 || yBounds.length != 2)
+            throw new IllegalArgumentException("Bounds arrays must have exactly 2 elements");
+
+        return random(xBounds[0], xBounds[1], yBounds[0], yBounds[1]);
+    }
+
+    public static Vector2 random(Vector2 corner1, Vector2 corner2) {
+        return random(corner1.x, corner2.x, corner1.y, corner2.y);
     }
 
     public Vector2 set(double x, double y) {

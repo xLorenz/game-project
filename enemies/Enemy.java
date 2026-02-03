@@ -7,6 +7,8 @@ import java.awt.Graphics2D;
 import java.util.ArrayList;
 import java.util.List;
 
+import particles.types.PhysicsParticle;
+
 public abstract class Enemy extends PhysicsBall {
 
     public static PhysicsHandler handler;
@@ -121,16 +123,27 @@ public abstract class Enemy extends PhysicsBall {
         supported = false;
     }
 
-    public void damage(int damage) {
+    public void damage(int ammount) {
 
+        health -= ammount;
+        if (health < 0) {
+            health = 0;
+            kill();
+        }
     }
 
     public void kill() {
         // rewards and remove()
+        remove();
+        for (int i = 0; i < 20; i++)
+            PhysicsParticle.emit(pos, Vector2.random(-100, 100, -100, 100), radius / 10, 10,
+                    displayColor);
     }
 
     public void remove() {
         // remove from Enemy list and handler objects
+        handler.removeObject(this);
+        enemies.remove(this);
     }
 
 }
