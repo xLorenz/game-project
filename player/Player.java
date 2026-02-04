@@ -9,6 +9,8 @@ import particles.types.SimpleBackgroundParticle;
 import particles.types.SimpleParticle;
 import particles.types.TriangleParticle;
 import physics.*;
+import player.skills.DoubleJump;
+import player.skills.Sprint;
 
 public class Player extends PhysicsBall {
 
@@ -18,9 +20,10 @@ public class Player extends PhysicsBall {
     public Color color;
 
     public HealthManager healthManager;
+    public SkillsManager skillsManager;
 
     public int baseSpeed = 55;
-    public double baseSprintModifier = 1.5;
+    public double speedMultiplier = 1.0;
     public int baseMaxSpeed = 250;
 
     public int baseJumpStrength = 600;
@@ -31,17 +34,15 @@ public class Player extends PhysicsBall {
 
     public double airBorneTimer = 0.0;
 
-    public boolean invulnerable = false;
-    public double invulnerableTimer = 0.0;
-
-    public boolean sprinting = false;
-
     public Player(Vector2 pos, Color color, PhysicsHandler handler) {
         super(25, 0.1, 10.0, 0L);
         this.pos = pos;
         this.color = color;
 
         this.healthManager = new HealthManager(100, 1.0);
+        this.skillsManager = new SkillsManager(this);
+        skillsManager.addSkill(new Sprint());
+        skillsManager.addSkill(new DoubleJump());
 
         this.forceAwake = true;
         this.friction = 0.0;
@@ -85,6 +86,9 @@ public class Player extends PhysicsBall {
         direction.set((handler.getMapPos(controller.mouse.pos).sub(pos)));
         direction.normalizeLocal();
 
+        skillsManager.updateSkills(dt);
+
+        // bg particles
         if (rand.nextInt(200) == 1)
             SimpleBackgroundParticle.emit(pos.add(Vector2.random(-1000, 1000, -1000, 1000)));
 
@@ -92,7 +96,7 @@ public class Player extends PhysicsBall {
 
     public void handleInputs() {
         // jump
-        boolean jump = (controller.keys.space.pressed || controller.keys.w.pressed);
+        boolean jump = (controller.keys.space.pressed);
         boolean allowed = (supported || airBorneTimer < 0.3);
 
         if (jump && allowed) {
@@ -107,32 +111,19 @@ public class Player extends PhysicsBall {
 
         // walk left
         if (controller.keys.a.pressed) {
-            if (vel.x > (sprinting ? -baseMaxSpeed * baseSprintModifier : -baseMaxSpeed)) {
-                vel.x -= sprinting ? baseSpeed * baseSprintModifier : baseSpeed;
-            }
-            if (sprinting && vel.x < 0 && supported) {
-                SimpleParticle.emit(new Vector2(pos.x, pos.y + radius),
-                        Vector2.random(0, 50, 0, -50),
-                        0.75 + rand.nextInt(20) / 10,
-                        1,
-                        color);
+            if (vel.x > -baseMaxSpeed * speedMultiplier) {
+                vel.x -= baseSpeed * speedMultiplier;
             }
         }
         // walk right
         if (controller.keys.d.pressed) {
-            if (vel.x < (sprinting ? baseMaxSpeed * baseSprintModifier : baseMaxSpeed)) {
-                vel.x += sprinting ? baseSpeed * baseSprintModifier : baseSpeed;
-            }
-            if (sprinting && vel.x > 0 && supported) {
-                SimpleParticle.emit(new Vector2(pos.x, pos.y + radius),
-                        Vector2.random(-50, 0, -50, 0),
-                        0.75 + rand.nextInt(20) / 10,
-                        1,
-                        color);
+            if (vel.x < baseMaxSpeed * speedMultiplier) {
+                vel.x += baseSpeed * speedMultiplier;
             }
         }
-        // sprint
-        sprinting = controller.keys.control.pressed;
+
+        // skills
+        skillsManager.handleInputs(controller);
     }
 
     public void updateTimers(double dt) {
@@ -142,6 +133,7 @@ public class Player extends PhysicsBall {
             airBorneTimer = 0;
         }
         healthManager.updateTimers(dt);
+        skillsManager.updateTimers(dt);
     }
 
     public void damage(int ammount) {

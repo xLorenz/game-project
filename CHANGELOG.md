@@ -162,7 +162,7 @@ Added to [Vector2].
 
     Methods:
        > static Vector2 random(int xMin, int xMax, int yMin, int yMax)
-       >  static Vector2 random(double xMin, double xMax, double yMin, double yMax) 
+       > static Vector2 random(double xMin, double xMax, double yMin, double yMax) 
        > static Vector2 random(Vector2 corner1, Vector2 corner2)
        > static Vector2 random(int[] xBounds, int[] yBounds)
 
@@ -181,3 +181,36 @@ Implemented the [public boolean background] param for particles, set to false by
 Implemented [renderBgParticles()] and [renderFgParticles()] in [ParticleHandler].
 
 Added [SimpleBackgroundParticle] to particle types
+
+### Skills implementation
+
+Implemented [SkillsManager] for player's skill handling.
+
+    Atributes:
+        > private ArrayList<Skill> skills = new ArrayList<>()
+        > public Skill selectedSkill
+        > private Player player
+
+    Methods:
+        > public void updateTimers(double dt) // update timers for all skills
+        > public void updateSkills(double dt) // updates skills
+        > public void handleInputs(Controller c) // updates activation through inputs
+        > public void addSkill(Skill s)
+        > public void removeSkill(Skill s)
+
+Implemented abstratc class [Skill].
+
+    Atributes:
+        
+        > protected double coolDownTime
+        > protected double coolDown
+        > protected boolean active
+        > protected boolean ready
+
+    Methods: 
+    
+        > public abstract void updateTimer(double dt)
+        > public abstract void update(double dt, Player player)
+        > public abstract void handleInputs(Controller c)
+
+Implemented concrete Skill classes [Sprint] (replacing sprint mechanic inside Player.handleInputs()) and [DoubleJump].

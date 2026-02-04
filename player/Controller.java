@@ -12,8 +12,8 @@ public class Controller {
     public Mouse mouse = new Mouse();
 
     public class Key {
-        int code;
-        boolean pressed = false;
+        public int code;
+        public boolean pressed = false;
 
         public Key(int code) {
             this.code = code;
@@ -22,16 +22,16 @@ public class Controller {
 
     public class Keys {
         public List<Key> list = new ArrayList<>();
-        Key space = new Key(KeyEvent.VK_SPACE);
-        Key w = new Key(KeyEvent.VK_W);
-        Key a = new Key(KeyEvent.VK_A);
-        Key s = new Key(KeyEvent.VK_S);
-        Key d = new Key(KeyEvent.VK_D);
-        Key q = new Key(KeyEvent.VK_Q);
-        Key e = new Key(KeyEvent.VK_E);
-        Key x = new Key(KeyEvent.VK_X);
-        Key control = new Key(KeyEvent.VK_CONTROL);
-        Key shift = new Key(KeyEvent.VK_SHIFT);
+        public Key space = new Key(KeyEvent.VK_SPACE);
+        public Key w = new Key(KeyEvent.VK_W);
+        public Key a = new Key(KeyEvent.VK_A);
+        public Key s = new Key(KeyEvent.VK_S);
+        public Key d = new Key(KeyEvent.VK_D);
+        public Key q = new Key(KeyEvent.VK_Q);
+        public Key e = new Key(KeyEvent.VK_E);
+        public Key x = new Key(KeyEvent.VK_X);
+        public Key control = new Key(KeyEvent.VK_CONTROL);
+        public Key shift = new Key(KeyEvent.VK_SHIFT);
 
         public Keys() {
             this.list.add(space);
