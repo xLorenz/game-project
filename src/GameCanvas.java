@@ -14,7 +14,8 @@ import javax.swing.SwingUtilities;
 import player.*;
 import enemies.*;
 import particles.ParticleHandler;
-import physics.*;
+import physics.process.PhysicsHandler;
+import physics.structures.Vector2;
 
 public class GameCanvas extends Canvas implements Runnable {
 
@@ -27,7 +28,7 @@ public class GameCanvas extends Canvas implements Runnable {
 
     private Vector2 mousePos = new Vector2();
 
-    private PhysicsHandler handler = new PhysicsHandler(size.width, size.height);
+    private PhysicsHandler handler = new PhysicsHandler();
     private ParticleHandler particleHandler = new ParticleHandler(handler);
     private Player player = new Player(new Vector2(size.width / 2, 0), Color.cyan, handler);
 
@@ -53,6 +54,8 @@ public class GameCanvas extends Canvas implements Runnable {
             createBufferStrategy(2);
         }
 
+        handler.beginUpdaterThread();
+
         if (updaterThread == null || !updaterThread.isAlive()) {
             updaterThread = new Thread(particleHandler.getUpdater(), "Particle-Updater");
             updaterThread.setDaemon(true);
@@ -71,6 +74,7 @@ public class GameCanvas extends Canvas implements Runnable {
         if (particleHandler.getUpdater() != null) {
             particleHandler.getUpdater().stop();
         }
+        handler.stopUpdaterThread();
 
         super.removeNotify();
     }
@@ -90,11 +94,12 @@ public class GameCanvas extends Canvas implements Runnable {
     }
 
     private void setUpGame() {
-        handler.displayScale = 0.5;
-        handler.anchorFollowRadius = 100;
-        handler.anchorFollowVelocity = 0.5;
-        handler.anchorFollowFriction = 0.95;
-        handler.mainObject = player;
+        handler.display.scale = 0.5;
+        handler.display.followRadius = 100;
+        handler.display.offsetAccel = 0.5;
+        handler.display.offsetFriction = 0.95;
+        handler.display.mainObject = player;
+        handler.display.setScreenCenter(new Vector2(size.width / 2, size.height / 2));
         Enemy.handler = handler;
         Enemy.player = player;
 
@@ -172,7 +177,7 @@ public class GameCanvas extends Canvas implements Runnable {
 
                     // handler.displayChunkBorders(g, size.width, size.height);
                     // handler.drawRecordedChunks(g);
-                    handler.displayObjects(g);
+                    handler.render(g);
                     // collision debug overlay
                     // handler.displayCollisionDebug(g);
                     particleHandler.renderFgParticles(g);
@@ -191,7 +196,7 @@ public class GameCanvas extends Canvas implements Runnable {
     }
 
     private void update(float dt) {
-        handler.updatePhysics(dt);
+        handler.display.update(dt);
         player.handleInputs();
     }
 

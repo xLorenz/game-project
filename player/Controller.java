@@ -4,7 +4,7 @@ import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.List;
 
-import physics.Vector2;
+import physics.structures.Vector2;
 
 public class Controller {
 

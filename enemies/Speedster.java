@@ -2,7 +2,7 @@ package enemies;
 
 import java.awt.Color;
 
-import physics.Vector2;
+import physics.structures.Vector2;
 
 public class Speedster extends Enemy {
     public Speedster(Vector2 pos) {

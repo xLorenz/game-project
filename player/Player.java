@@ -1,16 +1,17 @@
 package player;
 
 import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.Polygon;
 import java.util.Random;
 
-import particles.types.SimpleBackgroundParticle;
-import particles.types.SimpleParticle;
-import particles.types.TriangleParticle;
-import physics.*;
-import player.skills.DoubleJump;
-import player.skills.Sprint;
+import particles.types.*;
+import physics.objects.PhysicsBall;
+import physics.process.BatchRenderer;
+import physics.process.PhysicsHandler;
+import physics.structures.Vector2;
+import physics.structures.Manifold;
+import physics.objects.PhysicsRect;
+import physics.collisions.Collision;
+import player.skills.*;
 
 public class Player extends PhysicsBall {
 
@@ -53,23 +54,19 @@ public class Player extends PhysicsBall {
     }
 
     @Override
-    public void draw(Graphics2D g, Vector2 offset, double scale) {
-        Polygon shape = new Polygon();
-
-        Vector2 v1 = pos.add(direction.rotate(120 * 0).scale(radius * 1.5));
-        Vector2 v2 = pos.add(direction.rotate(120 * 1).scale(radius * 1.5).sub(vel.scale(radius * 1.5 / 1000)));
-        Vector2 v3 = pos.add(direction.rotate(120 * 2).scale(radius * 1.5).sub(vel.scale(radius * 1.5 / 1000)));
-
-        shape.addPoint((int) ((v1.x + offset.x) * scale), (int) ((v1.y + offset.y) * scale));
-        shape.addPoint((int) ((v2.x + offset.x) * scale), (int) ((v2.y + offset.y) * scale));
-        shape.addPoint((int) ((v3.x + offset.x) * scale), (int) ((v3.y + offset.y) * scale));
+    public void draw(BatchRenderer renderer) {
+        Vector2[] points = {
+                pos.add(direction.rotate(120 * 0).scale(radius * 1.5)),
+                pos.add(direction.rotate(120 * 1).scale(radius * 1.5).sub(vel.scale(radius * 1.5 / 1000))),
+                pos.add(direction.rotate(120 * 2).scale(radius * 1.5).sub(vel.scale(radius * 1.5 / 1000))),
+        };
 
         if (healthManager.vulnerable) {
-            g.setColor(color);
+            renderer.setFill(color, 255);
         } else {
-            g.setColor(color.darker());
+            renderer.setFill(color.darker(), 255);
         }
-        g.fillPolygon(shape);
+        renderer.drawPolygon(points, 3);
     }
 
     @Override
@@ -83,7 +80,7 @@ public class Player extends PhysicsBall {
             // TriangleParticle.emit(pos);
         }
 
-        direction.set((handler.getMapPos(controller.mouse.pos).sub(pos)));
+        direction.set((handler.display.getMapPos(controller.mouse.pos).sub(pos)));
         direction.normalizeLocal();
 
         skillsManager.updateSkills(dt);

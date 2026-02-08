@@ -5,7 +5,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import physics.PhysicsHandler;
+import physics.process.PhysicsHandler;
+import physics.process.BatchRenderer;
 
 public class ParticleHandler {
 
@@ -18,7 +19,7 @@ public class ParticleHandler {
     private final ParticleUpdater updater = new ParticleUpdater(this);
 
     public ParticleHandler(PhysicsHandler pHandler) {
-        renderer.setPhysicsHandler(pHandler);
+        renderer.setDisplay(pHandler.display);
         Particle.setHandler(this);
     }
 

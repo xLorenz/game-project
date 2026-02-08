@@ -2,8 +2,8 @@ package src;
 
 import java.awt.event.*;
 
-import physics.PhysicsHandler;
-import physics.Vector2;
+import physics.process.PhysicsHandler;
+import physics.structures.Vector2;
 import player.Player;
 
 public class Adapters {
@@ -30,10 +30,10 @@ public class Adapters {
         public void keyPressed(KeyEvent e) {
             player.controller.keyPress(e.getKeyCode());
             if (e.getKeyCode() == KeyEvent.VK_UP) {
-                handler.displayScale /= 0.8;
+                handler.display.setScale(handler.display.scale / 0.8);
             }
             if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-                handler.displayScale *= 0.8;
+                handler.display.setScale(handler.display.scale * 0.8);
             }
         }
 

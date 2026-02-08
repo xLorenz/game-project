@@ -2,7 +2,8 @@ package particles;
 
 import java.util.Random;
 
-import physics.Vector2;
+import physics.structures.Vector2;
+import physics.process.BatchRenderer;
 
 public abstract class Particle {
 

@@ -1,4 +1,4 @@
-package physics;
+package physics.structures;
 
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;

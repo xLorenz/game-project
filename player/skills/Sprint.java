@@ -3,7 +3,7 @@ package player.skills;
 import java.util.Random;
 
 import particles.types.SimpleParticle;
-import physics.Vector2;
+import physics.structures.Vector2;
 import player.Controller;
 import player.Player;
 

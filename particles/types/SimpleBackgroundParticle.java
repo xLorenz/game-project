@@ -4,8 +4,8 @@ import java.awt.Color;
 
 import particles.Particle;
 import particles.ParticlePool;
-import particles.BatchRenderer;
-import physics.Vector2;
+import physics.process.BatchRenderer;
+import physics.structures.Vector2;
 
 public class SimpleBackgroundParticle extends Particle {
 

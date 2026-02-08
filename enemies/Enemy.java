@@ -1,9 +1,12 @@
 package enemies;
 
-import physics.*;
-import player.*;
+import physics.objects.PhysicsBall;
+import physics.process.BatchRenderer;
+import physics.process.PhysicsHandler;
+import physics.structures.Vector2;
+import physics.structures.Contact;
+import player.Player;
 import java.awt.Color;
-import java.awt.Graphics2D;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,7 +46,7 @@ public abstract class Enemy extends PhysicsBall {
     }
 
     @Override
-    public void draw(Graphics2D g, Vector2 offset, double scale) {
+    public void draw(BatchRenderer renderer) {
         double diameter = radius * 2.0;
 
         // Tune these values
@@ -62,13 +65,11 @@ public abstract class Enemy extends PhysicsBall {
         // - Rising (vel.y < 0): stretch upward
         double yOffset = (vel.y > 0) ? -stretch : 0;
 
-        int x = (int) ((pos.x - radius + offset.x) * scale);
-        int y = (int) ((pos.y - radius + yOffset + offset.y) * scale);
-        int w = (int) (width * scale);
-        int h = (int) (height * scale);
+        int x = (int) ((pos.x));
+        int y = (int) ((pos.y - yOffset));
 
-        g.setColor(displayColor);
-        g.fillOval(x, y, w, h);
+        renderer.setFill(displayColor, 255);
+        renderer.drawOval(new Vector2(x, y), width, height);
     }
 
     @Override

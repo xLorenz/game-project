@@ -1,7 +1,7 @@
 package enemies;
 
 import java.awt.Color;
-import physics.*;
+import physics.structures.Vector2;
 
 public class Jumper extends Enemy {
 

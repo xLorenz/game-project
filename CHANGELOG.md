@@ -121,7 +121,7 @@ Deleted [class Panel extends JPanel] and implemented [class GameCanvas extends C
 [update(float dt)] runs the physics and player inputs.
 [render()] draws the game using a buffer strategy ( BufferStrategy bs = getBufferStrategy(); ), wrapping everything in do whiles to avoid black frames
 
-## Physics update
+### Physics update
 Updated physics, eliminating the parameter [airBorne] from all entities and replacing with [supported], inherited from physics objects.
 
 ### Particles update
@@ -214,3 +214,8 @@ Implemented abstratc class [Skill].
         > public abstract void handleInputs(Controller c)
 
 Implemented concrete Skill classes [Sprint] (replacing sprint mechanic inside Player.handleInputs()) and [DoubleJump].
+
+
+### Physics update 2
+
+Updated /physics, adding a physics update thread, unified Batch Rendering and simplified Display actions.
