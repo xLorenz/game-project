@@ -197,7 +197,7 @@ public class GameCanvas extends Canvas implements Runnable {
 
     private void update(float dt) {
         handler.display.update(dt);
-        player.handleInputs();
+        player.handleInputs(dt);
     }
 
 }

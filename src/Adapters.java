@@ -28,6 +28,7 @@ public class Adapters {
 
         @Override
         public void keyPressed(KeyEvent e) {
+
             player.controller.keyPress(e.getKeyCode());
             if (e.getKeyCode() == KeyEvent.VK_UP) {
                 handler.display.setScale(handler.display.scale / 0.8);
@@ -39,6 +40,7 @@ public class Adapters {
 
         @Override
         public void keyReleased(KeyEvent e) {
+
             player.controller.keyRelease(e.getKeyCode());
         }
     }

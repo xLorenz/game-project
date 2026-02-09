@@ -4,6 +4,8 @@ import java.awt.Color;
 import java.util.Random;
 
 import particles.types.*;
+import physics.objects.AreaCircle;
+import physics.objects.AreaRect;
 import physics.objects.PhysicsBall;
 import physics.process.BatchRenderer;
 import physics.process.PhysicsHandler;
@@ -23,7 +25,7 @@ public class Player extends PhysicsBall {
     public HealthManager healthManager;
     public SkillsManager skillsManager;
 
-    public int baseSpeed = 55;
+    public int baseSpeed = 1000;
     public double speedMultiplier = 1.0;
     public int baseMaxSpeed = 250;
 
@@ -34,6 +36,9 @@ public class Player extends PhysicsBall {
     public Controller controller = new Controller();
 
     public double airBorneTimer = 0.0;
+
+    private AreaRect area;
+    private AreaCircle area2;
 
     public Player(Vector2 pos, Color color, PhysicsHandler handler) {
         super(25, 0.1, 10.0, 0L);
@@ -51,10 +56,16 @@ public class Player extends PhysicsBall {
         handler.addObject(this);
         this.handler = handler;
 
+        area = new AreaRect(new Vector2(1000, 300), 100, 20);
+        handler.addObject(area);
+        area2 = new AreaCircle(new Vector2(500, 500), 100);
+        handler.addObject(area2);
+
     }
 
     @Override
     public void draw(BatchRenderer renderer) {
+        drawDebug(renderer);
         Vector2[] points = {
                 pos.add(direction.rotate(120 * 0).scale(radius * 1.5)),
                 pos.add(direction.rotate(120 * 1).scale(radius * 1.5).sub(vel.scale(radius * 1.5 / 1000))),
@@ -75,7 +86,7 @@ public class Player extends PhysicsBall {
         updateTimers(dt);
 
         if (supported) {
-            vel.x *= 0.8;
+            vel.x *= 0.99;
         } else {
             // TriangleParticle.emit(pos);
         }
@@ -89,38 +100,43 @@ public class Player extends PhysicsBall {
         if (rand.nextInt(200) == 1)
             SimpleBackgroundParticle.emit(pos.add(Vector2.random(-1000, 1000, -1000, 1000)));
 
+        if (area.getCollisions().contains(this))
+            vel.y = -baseJumpStrength * 2;
+        if (area2.getCollisions().contains(this))
+            PhysicsParticle.emit(area2.pos, Vector2.random(-100, 100, -300, -500), 1, 2, color);
     }
 
-    public void handleInputs() {
+    public void handleInputs(double dt) {
         // jump
-        boolean jump = (controller.keys.space.pressed);
-        boolean allowed = (supported || airBorneTimer < 0.3);
 
-        if (jump && allowed) {
-            // must be on the ground or in coyote timer
-            vel.set(new Vector2(vel.x, -baseJumpStrength));
+        if (supported && airBorneTimer == 0.0) {
+            if (controller.keys.space.singlePress()) {
+                // must be on the ground or in coyote timer
+                vel.set(new Vector2(vel.x, -baseJumpStrength));
 
-            for (int i = 0; i < 20; i++) {
-                SimpleParticle.emit(new Vector2(pos.x, pos.y + radius));
+                for (int i = 0; i < 20; i++) {
+                    SimpleParticle.emit(new Vector2(pos.x, pos.y + radius));
+                }
+                // airBorneTimer = 0.3;
             }
-            airBorneTimer = 0.3;
         }
 
         // walk left
         if (controller.keys.a.pressed) {
             if (vel.x > -baseMaxSpeed * speedMultiplier) {
-                vel.x -= baseSpeed * speedMultiplier;
+                vel.x -= baseSpeed * speedMultiplier * dt;
             }
         }
         // walk right
         if (controller.keys.d.pressed) {
             if (vel.x < baseMaxSpeed * speedMultiplier) {
-                vel.x += baseSpeed * speedMultiplier;
+                vel.x += baseSpeed * speedMultiplier * dt;
             }
         }
 
         // skills
         skillsManager.handleInputs(controller);
+        controller.update(dt);
     }
 
     public void updateTimers(double dt) {

@@ -7,7 +7,7 @@ import player.Player;
 
 public class DoubleJump extends Skill {
 
-    double thresholdForActivation = 0.5;
+    double thresholdForActivation = 0.0;
     boolean used = false;
 
     public DoubleJump() {
@@ -55,7 +55,7 @@ public class DoubleJump extends Skill {
 
     @Override
     public void handleInputs(Controller c) {
-        if (c.keys.space.pressed && ready) {
+        if (c.keys.space.singlePress() && ready) {
             active = true;
         }
     }

@@ -14,9 +14,20 @@ public class Controller {
     public class Key {
         public int code;
         public boolean pressed = false;
+        public boolean singlePress = false;
+        public double timePressed = 0.0;
 
         public Key(int code) {
             this.code = code;
+        }
+
+        public boolean singlePress() {
+            if (singlePress) {
+                singlePress = false;
+                return true;
+            } else {
+                return false;
+            }
         }
     }
 
@@ -62,9 +73,25 @@ public class Controller {
         }
     }
 
+    public void update(double dt) {
+        for (Key k : keys.list) {
+            if (k.pressed) {
+                k.timePressed += dt;
+            }
+        }
+        for (Key k : mouse.list) {
+            if (k.pressed) {
+                k.timePressed += dt;
+            }
+        }
+    }
+
     public void keyPress(int keyCode) {
         for (Key k : keys.list) {
             if (k.code == keyCode) {
+                if (!k.pressed) {
+                    k.singlePress = true;
+                }
                 k.pressed = true;
             }
         }
@@ -73,6 +100,7 @@ public class Controller {
     public void keyRelease(int keyCode) {
         for (Key k : keys.list) {
             if (k.code == keyCode) {
+                k.singlePress = false;
                 k.pressed = false;
             }
         }
@@ -81,8 +109,11 @@ public class Controller {
     public void mousePress(int mouseCode) {
         for (Key k : mouse.list) {
             if (k.code == mouseCode) {
-                k.pressed = true;
+                if (!k.pressed) {
+                    k.singlePress = true;
+                }
             }
+            k.pressed = true;
         }
     }
 
@@ -90,6 +121,7 @@ public class Controller {
         for (Key k : mouse.list) {
             if (k.code == mouseCode) {
                 k.pressed = false;
+                k.singlePress = false;
             }
         }
     }

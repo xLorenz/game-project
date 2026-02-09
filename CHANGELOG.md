@@ -219,3 +219,7 @@ Implemented concrete Skill classes [Sprint] (replacing sprint mechanic inside Pl
 ### Physics update 2
 
 Updated /physics, adding a physics update thread, unified Batch Rendering and simplified Display actions.
+
+### Area triggers and single press keys
+
+Implemented [AreaCircle] extends [PhysicsBall] and [AreaRect] extends [PhysicsRect]. Both act as area triggers, no collisions, but still detect collisions. Use [getCollisions()] to get a snapshot of the list of collisions.
